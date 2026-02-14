@@ -131,7 +131,7 @@
   color: inherit;
 }
 
-.nn-editor-prosemirror .is-empty::before {
+.nn-editor-prosemirror .is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   color: var(--color-muted-foreground);
   float: left;

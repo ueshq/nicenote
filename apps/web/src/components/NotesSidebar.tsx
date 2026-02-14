@@ -128,24 +128,24 @@ export function NotesSidebar({
       {!isSidebarOpen && (
         <button
           onClick={openSidebar}
-          className="fixed top-4 left-4 z-50 rounded-md bg-background p-2 shadow-sm transition-colors hover:bg-accent"
+          className="fixed top-4 left-4 z-50 rounded-md bg-background p-2 shadow-sm transition-colors hover:bg-accent focus:ring-0"
         >
           <ArrowRightFromLine className={WEB_ICON_MD_CLASS} />
         </button>
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-background transition-transform duration-300 ${
+        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-background transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
-        style={{ width: isSidebarOpen ? `${sidebarWidth}px` : undefined }}
+        style={{ width: `${sidebarWidth}px` }}
       >
         <div className="flex flex-col gap-4 p-4">
           <div className="flex items-center justify-between">
             <div className={WEB_ROW_WITH_ICON_CLASS}>
               <button
                 onClick={toggleSidebar}
-                className="rounded-md p-1.5 transition-colors hover:bg-accent"
+                className="rounded-md p-1.5 transition-colors hover:bg-accent focus:ring-0"
               >
                 <ArrowRightFromLine
                   className={`${WEB_ICON_MD_CLASS} transition-transform duration-300 ${isSidebarOpen ? 'rotate-180' : ''}`}

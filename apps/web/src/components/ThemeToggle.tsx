@@ -10,7 +10,7 @@ export function ThemeToggle() {
     <button
       onClick={toggleTheme}
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-      className={WEB_ICON_BUTTON_CLASS}
+      className={`${WEB_ICON_BUTTON_CLASS} focus:ring-0`}
     >
       {theme === 'dark' ? (
         <Sun className={WEB_ICON_MD_CLASS} />

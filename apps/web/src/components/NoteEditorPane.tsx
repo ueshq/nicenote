@@ -40,8 +40,11 @@ export function NoteEditorPane({ isSidebarOpen, sidebarWidth, scheduleSave }: No
 
   return (
     <main
-      className="flex flex-1 flex-col transition-all duration-300"
-      style={{ marginLeft: isSidebarOpen ? `${sidebarWidth}px` : 0 }}
+      className="flex flex-1 flex-col duration-300 ease-in-out"
+      style={{
+        marginLeft: isSidebarOpen ? `${sidebarWidth}px` : 0,
+        transitionProperty: 'margin-left',
+      }}
     >
       {currentNote ? (
         <>
