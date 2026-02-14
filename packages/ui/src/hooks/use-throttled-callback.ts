@@ -5,13 +5,8 @@ import { throttle } from '@nicenote/shared'
 import { useUnmount } from './use-unmount'
 
 interface ThrottleSettings {
-  leading?: boolean | undefined
-  trailing?: boolean | undefined
-}
-
-const defaultOptions: ThrottleSettings = {
-  leading: false,
-  trailing: true,
+  leading?: boolean
+  trailing?: boolean
 }
 
 /**
@@ -27,13 +22,17 @@ export function useThrottledCallback<T extends (...args: any[]) => any>(
   fn: T,
   wait = 250,
   dependencies: React.DependencyList = [],
-  options: ThrottleSettings = defaultOptions
+  options: ThrottleSettings = {}
 ): {
   (this: ThisParameterType<T>, ...args: Parameters<T>): ReturnType<T>
   cancel: () => void
 } {
   const handler = useMemo(
-    () => throttle<T>(fn, wait, { ...defaultOptions, ...options }),
+    () =>
+      throttle<T>(fn, wait, {
+        leading: options.leading ?? false,
+        trailing: options.trailing ?? true,
+      }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies
   )

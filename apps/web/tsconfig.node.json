@@ -5,6 +5,9 @@
     "target": "ES2023",
     "lib": ["ES2023"],
     "types": ["node"],
+    "paths": {
+      "@nicenote/tokens": ["../../packages/tokens/src/index.ts"]
+    },
     "noEmit": true,
     "erasableSyntaxOnly": true
   },

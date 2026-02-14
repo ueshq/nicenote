@@ -30,6 +30,12 @@ type VarSection = {
   entries: VarEntry[]
 }
 
+function typedEntries<const T extends Record<string, unknown>>(
+  value: T
+): [keyof T & string, T[keyof T]][] {
+  return Object.entries(value) as [keyof T & string, T[keyof T]][]
+}
+
 const COLOR_SECTIONS: VarSection[] = [
   {
     title: 'Primary colors',
@@ -195,11 +201,11 @@ function buildBaseSections(): VarSection[] {
       entries: [
         ['font-sans', FONT_SANS_STACK],
         ['font-mono', FONT_MONO_STACK],
-        ...Object.entries(fontSize).flatMap(([key, value]): VarEntry[] => [
+        ...typedEntries(fontSize).flatMap(([key, value]): VarEntry[] => [
           [`text-${toKebabCase(key)}`, toRem(value.size)],
           [`text-${toKebabCase(key)}--line-height`, toRem(value.lineHeight)],
         ]),
-        ...Object.entries(fontWeight).map(
+        ...typedEntries(fontWeight).map(
           ([key, value]): VarEntry => [
             `font-weight-${toFontWeightTokenKey(toKebabCase(key))}`,
             String(value),
@@ -209,7 +215,7 @@ function buildBaseSections(): VarSection[] {
     },
     {
       title: 'Radius',
-      entries: Object.entries(borderRadius).map(
+      entries: typedEntries(borderRadius).map(
         ([key, value]): VarEntry => [`radius-${toKebabCase(key)}`, toRem(value)]
       ),
     },
@@ -217,27 +223,27 @@ function buildBaseSections(): VarSection[] {
       title: 'Spacing',
       entries: [
         ['spacing', toRem(spacing[1])],
-        ...Object.entries(spacing).map(
+        ...typedEntries(spacing).map(
           ([key, value]): VarEntry => [`spacing-${toSpacingTokenKey(key)}`, toRem(value)]
         ),
       ],
     },
     {
       title: 'Shadows',
-      entries: Object.entries(shadowWeb).map(
+      entries: typedEntries(shadowWeb).map(
         ([key, value]): VarEntry => [`shadow-${toKebabCase(key)}`, value]
       ),
     },
     {
       title: 'Motion',
       entries: [
-        ...Object.entries(duration).map(
+        ...typedEntries(duration).map(
           ([key, value]): VarEntry => [
             `motion-duration-${toKebabCase(key)}`,
             toDurationSeconds(value),
           ]
         ),
-        ...Object.entries(easing).map(
+        ...typedEntries(easing).map(
           ([key, value]): VarEntry => [`motion-easing-${toKebabCase(key)}`, value]
         ),
       ],
