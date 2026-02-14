@@ -2,7 +2,6 @@
  * @nicenote/shared — 入口
  *
  * 所有工具函数和通用类型的统一出口
- * 消费者只需要: import { request, storage, ... } from '@nicenote/shared'
  */
 
 // ============================================================
@@ -22,10 +21,8 @@ export {
   isValidDate,
   timeAgo,
 } from './formatDate'
-export type { ParsedUrl } from './parsers'
 export {
   parseQuery,
-  parseUrl,
   safeJsonParse,
   toCamelCase,
   toConstantCase,
@@ -43,11 +40,7 @@ export {
   shuffle,
   weightedRandom,
 } from './random'
-export type { RequestConfig, ApiResponse as RequestResponse } from './request'
-export { ApiError, Request, request } from './request'
 export { sleep, SleepAbortError } from './sleep'
-export type { StorageAdapter } from './storage'
-export { createAsyncStorageAdapter, Storage, storage, WebStorageAdapter } from './storage'
 export type { PasswordStrength, ValidationResult } from './validators'
 export {
   email,
@@ -63,11 +56,6 @@ export {
   url,
   validate,
 } from './validators'
-
-// ============================================================
-// 平台 & 快捷键
-// ============================================================
-export { formatShortcutKey, isMac, MAC_SYMBOLS, parseShortcutKeys } from './platform'
 
 // ============================================================
 // 领域 Schema & 类型

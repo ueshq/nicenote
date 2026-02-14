@@ -1,7 +1,6 @@
 import { forwardRef, Fragment, useMemo } from 'react'
 
-import { parseShortcutKeys } from '@nicenote/shared'
-
+import { parseShortcutKeys } from '../../lib/platform'
 import { cn } from '../../lib/utils'
 // --- Tiptap UI Primitive ---
 import { Tooltip, TooltipContent, TooltipTrigger } from '../tooltip'

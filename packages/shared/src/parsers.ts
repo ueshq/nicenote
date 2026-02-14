@@ -74,44 +74,6 @@ export function toQuery(
 }
 
 // ============================================================
-// URL 解析
-// ============================================================
-
-export interface ParsedUrl {
-  protocol: string // 'https:'
-  host: string // 'example.com:8080'
-  hostname: string // 'example.com'
-  port: string // '8080'
-  pathname: string // '/path/to/page'
-  search: string // '?key=value'
-  hash: string // '#section'
-  query: Record<string, string | string[]>
-}
-
-/**
- * 解析完整 URL
- *
- * @example
- *   parseUrl('https://example.com:8080/path?key=value#section')
- *   // { protocol: 'https:', hostname: 'example.com', port: '8080', ... }
- */
-export function parseUrl(url: string): ParsedUrl {
-  // Web 和 Node.js 都有 URL 构造函数
-  const parsed = new URL(url)
-
-  return {
-    protocol: parsed.protocol,
-    host: parsed.host,
-    hostname: parsed.hostname,
-    port: parsed.port,
-    pathname: parsed.pathname,
-    search: parsed.search,
-    hash: parsed.hash,
-    query: parseQuery(parsed.search),
-  }
-}
-
-// ============================================================
 // 命名格式转换
 // ============================================================
 
