@@ -2,8 +2,8 @@ import { formatDistanceToNow } from 'date-fns'
 import { FileText, Plus } from 'lucide-react'
 import { useShallow } from 'zustand/react/shallow'
 
-import type { NoteUpdateInput } from '@nicenote/contract'
 import { NicenoteEditor } from '@nicenote/editor'
+import type { NoteUpdateInput } from '@nicenote/shared'
 
 import { useMinuteTicker } from '../hooks/useMinuteTicker'
 import { WEB_ICON_SM_CLASS } from '../lib/class-names'

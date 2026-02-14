@@ -2,6 +2,7 @@
   "name": "@nicenote/editor",
   "version": "0.0.1",
   "dependencies": {
+    "@nicenote/shared": "workspace:*",
     "@nicenote/ui": "workspace:*",
     "@tiptap/core": "^3.18.0",
     "@tiptap/extension-placeholder": "^3.18.0",

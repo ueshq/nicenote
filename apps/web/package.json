@@ -2,8 +2,9 @@
   "name": "web",
   "version": "0.0.0",
   "dependencies": {
-    "@nicenote/contract": "workspace:*",
+    "api": "workspace:*",
     "@nicenote/editor": "workspace:*",
+    "@nicenote/shared": "workspace:*",
     "@nicenote/tokens": "workspace:*",
     "date-fns": "^4.1.0",
     "hono": "^4.11.9",

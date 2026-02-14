@@ -2,9 +2,8 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 
-import { registerNoteRoutes } from '@nicenote/contract'
-
 import { createNoteService, type NoteServiceBindings } from './services/note-service'
+import { registerNoteRoutes } from './routes'
 
 const app = new Hono<{ Bindings: NoteServiceBindings }>()
 
@@ -45,4 +44,6 @@ export type {
 } from './services/note-service'
 
 registerNoteRoutes(app, createNoteService)
+
+export type { AppType } from './routes'
 export default app

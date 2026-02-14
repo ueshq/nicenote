@@ -47,3 +47,11 @@ export type NoteSelect = z.infer<typeof noteSelectSchema>
 export type NoteInsert = z.infer<typeof noteInsertSchema>
 export type NoteCreateInput = z.infer<typeof noteCreateSchema>
 export type NoteUpdateInput = z.infer<typeof noteUpdateSchema>
+
+export interface NoteContractService {
+  list: () => Promise<NoteSelect[]> | NoteSelect[]
+  getById: (id: string) => Promise<NoteSelect | null> | NoteSelect | null
+  create: (input: NoteCreateInput) => Promise<NoteSelect> | NoteSelect
+  update: (id: string, input: NoteUpdateInput) => Promise<NoteSelect | null> | NoteSelect | null
+  remove: (id: string) => Promise<void> | void
+}

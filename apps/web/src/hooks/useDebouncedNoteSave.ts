@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 
-import type { NoteUpdateInput } from '@nicenote/contract'
+import type { NoteUpdateInput } from '@nicenote/shared'
 
 interface UseDebouncedNoteSaveOptions {
   delayMs?: number

@@ -3,22 +3,12 @@ import { type Env, Hono } from 'hono'
 import type { Schema } from 'hono/types'
 
 import {
-  type NoteCreateInput,
+  type NoteContractService,
   noteCreateSchema,
   noteIdParamSchema,
-  type NoteSelect,
   noteSelectSchema,
-  type NoteUpdateInput,
   noteUpdateSchema,
-} from './schemas'
-
-export interface NoteContractService {
-  list: () => Promise<NoteSelect[]> | NoteSelect[]
-  getById: (id: string) => Promise<NoteSelect | null> | NoteSelect | null
-  create: (input: NoteCreateInput) => Promise<NoteSelect> | NoteSelect
-  update: (id: string, input: NoteUpdateInput) => Promise<NoteSelect | null> | NoteSelect | null
-  remove: (id: string) => Promise<void> | void
-}
+} from '@nicenote/shared'
 
 export type NoteContractFactory<E extends Env> = (bindings: E['Bindings']) => NoteContractService
 

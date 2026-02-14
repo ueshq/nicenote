@@ -4,7 +4,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { ArrowRightFromLine, FileText, Plus, Search, Trash2 } from 'lucide-react'
 import { useShallow } from 'zustand/react/shallow'
 
-import type { NoteSelect } from '@nicenote/contract'
+import type { NoteSelect } from '@nicenote/shared'
 
 import { useMinuteTicker } from '../hooks/useMinuteTicker'
 import { WEB_ICON_MD_CLASS, WEB_ICON_SM_CLASS, WEB_ROW_WITH_ICON_CLASS } from '../lib/class-names'

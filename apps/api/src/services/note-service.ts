@@ -2,7 +2,7 @@ import { drizzle } from 'drizzle-orm/d1'
 import { eq } from 'drizzle-orm/sql/expressions/conditions'
 import { desc } from 'drizzle-orm/sql/expressions/select'
 
-import { type NoteContractService, type NoteInsert, type NoteSelect } from '@nicenote/contract'
+import { type NoteContractService, type NoteInsert, type NoteSelect } from '@nicenote/shared'
 
 import { notes } from '../db/schema'
 

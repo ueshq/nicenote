@@ -51,6 +51,7 @@ export { createAsyncStorageAdapter, Storage, storage, WebStorageAdapter } from '
 export type { PasswordStrength, ValidationResult } from './validators'
 export {
   email,
+  getLinkValidationError,
   lengthRange,
   maxLength,
   minLength,
@@ -62,6 +63,29 @@ export {
   url,
   validate,
 } from './validators'
+
+// ============================================================
+// 平台 & 快捷键
+// ============================================================
+export { formatShortcutKey, isMac, MAC_SYMBOLS, parseShortcutKeys } from './platform'
+
+// ============================================================
+// 领域 Schema & 类型
+// ============================================================
+export type {
+  NoteContractService,
+  NoteCreateInput,
+  NoteInsert,
+  NoteSelect,
+  NoteUpdateInput,
+} from './schemas'
+export {
+  noteCreateSchema,
+  noteIdParamSchema,
+  noteInsertSchema,
+  noteSelectSchema,
+  noteUpdateSchema,
+} from './schemas'
 
 // ============================================================
 // 常量

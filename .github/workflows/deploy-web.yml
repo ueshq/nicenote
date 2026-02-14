@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - 'apps/web/**'
-      - 'packages/contract/**'
+      - 'packages/shared/**'
       - 'packages/editor/**'
       - 'packages/tokens/**'
       - 'packages/ui/**'

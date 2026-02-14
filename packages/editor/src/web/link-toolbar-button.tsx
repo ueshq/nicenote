@@ -3,10 +3,10 @@ import { useEffect, useState } from 'react'
 import type { Editor } from '@tiptap/react'
 import { Link2, Link2Off } from 'lucide-react'
 
+import { getLinkValidationError } from '@nicenote/shared'
 import { Button, Input, Popover, PopoverContent, PopoverTrigger } from '@nicenote/ui'
 
 import { clearLink, setLinkHref } from '../core/commands'
-import { getLinkValidationError } from '../core/link'
 import type { NoteEditorStateSnapshot } from '../core/state'
 
 function getLinkIcon(linkActive: boolean) {

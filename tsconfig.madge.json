@@ -3,7 +3,6 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@nicenote/contract": ["packages/contract/src/index.ts"],
       "@nicenote/editor": ["packages/editor/src/index.ts"],
       "@nicenote/editor/styles/*": ["packages/editor/src/styles/*"],
       "@nicenote/shared": ["packages/shared/src/index.ts"],

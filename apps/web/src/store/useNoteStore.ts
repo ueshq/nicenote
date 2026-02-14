@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import type { NoteSelect, NoteUpdateInput } from '@nicenote/contract'
+import type { NoteSelect, NoteUpdateInput } from '@nicenote/shared'
 
 import { api } from '../lib/api'
 

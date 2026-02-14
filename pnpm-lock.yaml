@@ -71,9 +71,12 @@ importers:
 
   apps/api:
     dependencies:
-      '@nicenote/contract':
+      '@hono/zod-validator':
+        specifier: ^0.7.6
+        version: 0.7.6(hono@4.11.9)(zod@4.3.6)
+      '@nicenote/shared':
         specifier: workspace:*
-        version: link:../../packages/contract
+        version: link:../../packages/shared
       drizzle-orm:
         specifier: ^0.45.1
         version: 0.45.1(@cloudflare/workers-types@4.20260203.0)
@@ -102,15 +105,18 @@ importers:
 
   apps/web:
     dependencies:
-      '@nicenote/contract':
-        specifier: workspace:*
-        version: link:../../packages/contract
       '@nicenote/editor':
         specifier: workspace:*
         version: link:../../packages/editor
+      '@nicenote/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@nicenote/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens
+      api:
+        specifier: workspace:*
+        version: link:../api
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -161,24 +167,11 @@ importers:
         specifier: ^7.2.4
         version: 7.3.1(@types/node@24.10.10)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2)
 
-  packages/contract:
-    dependencies:
-      '@hono/zod-validator':
-        specifier: ^0.7.6
-        version: 0.7.6(hono@4.11.9)(zod@4.3.6)
-      hono:
-        specifier: ^4.11.9
-        version: 4.11.9
-      zod:
-        specifier: ^4.3.6
-        version: 4.3.6
-    devDependencies:
-      typescript:
-        specifier: ~5.9.3
-        version: 5.9.3
-
   packages/editor:
     dependencies:
+      '@nicenote/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@nicenote/ui':
         specifier: workspace:*
         version: link:../ui
@@ -224,6 +217,10 @@ importers:
         version: 19.2.4(react@19.2.4)
 
   packages/shared:
+    dependencies:
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       typescript:
         specifier: ~5.9.3
@@ -240,6 +237,9 @@ importers:
       '@floating-ui/react':
         specifier: ^0.27.17
         version: 0.27.17(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@nicenote/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@radix-ui/react-dropdown-menu':
         specifier: ^2.1.16
         version: 2.1.16(@types/react-dom@19.2.3(@types/react@19.2.10))(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
