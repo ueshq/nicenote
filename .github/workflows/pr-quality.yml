@@ -13,6 +13,20 @@ on:
       - 'turbo.json'
       - 'tsconfig*.json'
       - '.github/workflows/**'
+  workflow_call:
+    inputs:
+      scope:
+        description: 'Quality scope: all | api | web'
+        required: false
+        default: 'all'
+        type: string
+
+concurrency:
+  group: pr-quality-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   quality:
@@ -33,16 +47,31 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
-      - name: Lint
-        run: pnpm lint
+      - name: Run quality checks
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            pnpm lint
+            pnpm exec tsc -b --pretty false
+            pnpm build
+            pnpm test
+            exit 0
+          fi
 
-      - name: Typecheck
-        run: pnpm exec tsc -b --pretty false
-
-      - name: Build
-        run: pnpm build
-
-      - name: Test
-        run: pnpm test
+          case "${{ inputs.scope }}" in
+            api)
+              pnpm exec turbo run lint build test --filter=api...
+              pnpm --filter api exec tsc -p tsconfig.json --noEmit
+              ;;
+            web)
+              pnpm exec turbo run lint build test --filter=web...
+              pnpm --filter web exec tsc -p tsconfig.app.json --noEmit
+              ;;
+            *)
+              pnpm lint
+              pnpm exec tsc -b --pretty false
+              pnpm build
+              pnpm test
+              ;;
+          esac
