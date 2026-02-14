@@ -1,15 +1,43 @@
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 
-export function useMinuteTicker(intervalMs = 60000) {
-  const [, setTick] = useState(0)
+const MINUTE_TICK_INTERVAL_MS = 60000
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTick((value) => value + 1)
-    }, intervalMs)
+let tick = 0
+const listeners = new Set<() => void>()
+let timer: ReturnType<typeof setInterval> | null = null
 
-    return () => {
-      clearInterval(timer)
+function emitTick() {
+  tick += 1
+  listeners.forEach((listener) => listener())
+}
+
+function startTicker() {
+  if (timer !== null) return
+  timer = setInterval(emitTick, MINUTE_TICK_INTERVAL_MS)
+}
+
+function stopTicker() {
+  if (timer === null) return
+  clearInterval(timer)
+  timer = null
+}
+
+function subscribe(listener: () => void) {
+  listeners.add(listener)
+  startTicker()
+
+  return () => {
+    listeners.delete(listener)
+    if (listeners.size === 0) {
+      stopTicker()
     }
-  }, [intervalMs])
+  }
+}
+
+function getSnapshot() {
+  return tick
+}
+
+export function useMinuteTicker() {
+  useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
 }

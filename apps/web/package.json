@@ -30,7 +30,8 @@
     "dev": "vite",
     "generate:css": "pnpm --filter @nicenote/tokens build && tsx scripts/generate-css.ts",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run"
   },
   "type": "module"
 }

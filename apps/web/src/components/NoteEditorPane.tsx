@@ -60,7 +60,10 @@ export function NoteEditorPane({ isSidebarOpen, sidebarWidth, scheduleSave }: No
             </div>
           </div>
           <div className="flex-1 overflow-hidden px-8 pb-8">
-            <NicenoteEditor value={currentNote.content} onChange={handleContentChange} />
+            <NicenoteEditor
+              value={currentNote.content ?? undefined}
+              onChange={handleContentChange}
+            />
           </div>
         </>
       ) : (

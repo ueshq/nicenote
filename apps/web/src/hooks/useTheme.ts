@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react'
 
-const THEME_KEY = 'nicenote-theme'
-
 type Theme = 'light' | 'dark'
+
+function getThemeStorageKey(): string | null {
+  if (typeof document === 'undefined') return null
+
+  return document.documentElement.getAttribute('data-theme-storage-key')
+}
 
 /**
  * Theme management hook
@@ -26,6 +30,7 @@ export function useTheme() {
   useEffect(() => {
     const root = document.documentElement
     const shouldBeDark = theme === 'dark'
+    const storageKey = getThemeStorageKey()
 
     if (shouldBeDark) {
       root.classList.add('dark')
@@ -35,7 +40,9 @@ export function useTheme() {
       root.setAttribute('data-theme', 'light')
     }
 
-    localStorage.setItem(THEME_KEY, theme)
+    if (storageKey) {
+      localStorage.setItem(storageKey, theme)
+    }
   }, [theme])
 
   const toggleTheme = () => {

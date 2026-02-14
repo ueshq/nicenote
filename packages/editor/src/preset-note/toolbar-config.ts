@@ -21,10 +21,17 @@ export const LIST_MENU_ITEMS: readonly NoteToolbarItem[] = [
 
 export const NOTE_TOOLBAR_GROUPS: readonly (readonly NoteToolbarItem[])[] = [
   [
+    { id: 'undo', label: '撤销', shortcut: 'Mod+Z' },
+    { id: 'redo', label: '重做', shortcut: 'Mod+Shift+Z' },
     { id: 'headingMenu', label: '标题' },
     { id: 'listMenu', label: '列表' },
+  ],
+  [
     { id: 'bold', label: '加粗', shortcut: 'Mod+B' },
     { id: 'italic', label: '斜体', shortcut: 'Mod+I' },
+    { id: 'strike', label: '删除线' },
+    { id: 'code', label: '行内代码' },
+    { id: 'blockquote', label: '引用' },
   ],
   [{ id: 'link', label: '链接', shortcut: 'Mod+K' }],
   [{ id: 'sourceMode', label: '源码', shortcut: 'Mod+Shift+M' }],

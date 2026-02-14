@@ -2,29 +2,33 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-storage-key" content="nicenote-theme" />
 
     <!-- Theme initialization script - runs before page renders to prevent flash -->
     <script>
       ;(function () {
-        const THEME_KEY = 'nicenote-theme'
-        const savedTheme = localStorage.getItem(THEME_KEY)
+        const root = document.documentElement
+        const storageKey = document
+          .querySelector('meta[name="theme-storage-key"]')
+          ?.getAttribute('content')
+
+        if (storageKey) {
+          root.setAttribute('data-theme-storage-key', storageKey)
+        }
+
+        const savedTheme = storageKey ? localStorage.getItem(storageKey) : null
 
         // Default to light mode if no saved preference
-        const shouldBeDark = savedTheme === 'dark'
+        const theme = savedTheme === 'dark' ? 'dark' : 'light'
 
-        if (shouldBeDark) {
-          document.documentElement.classList.add('dark')
-          document.documentElement.setAttribute('data-theme', 'dark')
-        } else {
-          document.documentElement.classList.remove('dark')
-          document.documentElement.setAttribute('data-theme', 'light')
-        }
+        root.classList.toggle('dark', theme === 'dark')
+        root.setAttribute('data-theme', theme)
       })()
     </script>
 
-    <title>web</title>
+    <title>Nicenote</title>
   </head>
   <body>
     <div id="root"></div>

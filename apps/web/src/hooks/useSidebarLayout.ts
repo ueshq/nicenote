@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { type PointerEvent, useCallback, useEffect, useRef, useState } from 'react'
 
 const MIN_SIDEBAR_WIDTH = 260
 const MAX_SIDEBAR_WIDTH = 560
@@ -13,6 +13,7 @@ export function useSidebarLayout({ defaultSidebarWidth = 320 }: UseSidebarLayout
   const [isMobile, setIsMobile] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(defaultSidebarWidth)
   const [isResizing, setIsResizing] = useState(false)
+  const activePointerIdRef = useRef<number | null>(null)
 
   const openSidebar = useCallback(() => {
     setIsSidebarOpen(true)
@@ -22,7 +23,10 @@ export function useSidebarLayout({ defaultSidebarWidth = 320 }: UseSidebarLayout
     setIsSidebarOpen((previous) => !previous)
   }, [])
 
-  const startResizing = useCallback(() => {
+  const startResizing = useCallback((event: PointerEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    activePointerIdRef.current = event.pointerId
+    event.currentTarget.setPointerCapture(event.pointerId)
     setIsResizing(true)
   }, [])
 
@@ -40,27 +44,37 @@ export function useSidebarLayout({ defaultSidebarWidth = 320 }: UseSidebarLayout
   }, [])
 
   useEffect(() => {
-    const handleMouseMove = (event: MouseEvent) => {
+    const handlePointerMove = (event: globalThis.PointerEvent) => {
       if (!isResizing || !isSidebarOpen) return
+      if (activePointerIdRef.current !== null && event.pointerId !== activePointerIdRef.current) {
+        return
+      }
 
       const nextWidth = event.clientX
       if (nextWidth < MIN_SIDEBAR_WIDTH || nextWidth > MAX_SIDEBAR_WIDTH) return
       setSidebarWidth(nextWidth)
     }
 
-    const handleMouseUp = () => {
+    const stopResizing = (event: globalThis.PointerEvent) => {
+      if (activePointerIdRef.current !== null && event.pointerId !== activePointerIdRef.current) {
+        return
+      }
+
+      activePointerIdRef.current = null
       setIsResizing(false)
     }
 
     if (isResizing) {
-      document.addEventListener('mousemove', handleMouseMove)
-      document.addEventListener('mouseup', handleMouseUp)
+      document.addEventListener('pointermove', handlePointerMove)
+      document.addEventListener('pointerup', stopResizing)
+      document.addEventListener('pointercancel', stopResizing)
       document.body.style.userSelect = 'none'
     }
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
+      document.removeEventListener('pointermove', handlePointerMove)
+      document.removeEventListener('pointerup', stopResizing)
+      document.removeEventListener('pointercancel', stopResizing)
       document.body.style.userSelect = ''
     }
   }, [isResizing, isSidebarOpen])

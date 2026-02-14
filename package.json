@@ -19,7 +19,8 @@
     "tsx": "^4.21.0",
     "turbo": "^2.8.1",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.54.0"
+    "typescript-eslint": "^8.54.0",
+    "vitest": "^3.2.4"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -38,7 +39,9 @@
     "generate:css": "pnpm --filter web generate:css",
     "lint": "turbo lint && pnpm lint:cycles",
     "lint:cycles": "madge --extensions ts,tsx --ts-config ./tsconfig.madge.json --exclude '(?:^|/)dist/|\\\\.css$' --circular apps/api/src apps/web/src/App.tsx apps/web/src/components apps/web/src/hooks apps/web/src/lib apps/web/src/store packages/contract/src packages/editor/src packages/shared/src packages/tokens/src packages/ui/src",
-    "prepare": "husky"
+    "prepare": "husky",
+    "typecheck": "tsc -b --pretty false",
+    "test": "turbo test"
   },
   "type": "module"
 }

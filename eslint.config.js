@@ -129,7 +129,7 @@ export default tseslint.config(
 
   // 7. Web 应用特定配置 (apps/web)
   {
-    files: ['apps/web/**/*.{ts,tsx}'],
+    files: ['apps/web/src/**/*.{ts,tsx}'],
     plugins: {
       'react-refresh': reactRefresh,
     },
@@ -137,8 +137,7 @@ export default tseslint.config(
       ecmaVersion: 2020,
       globals: globals.browser,
       parserOptions: {
-        projectService: true,
-        tsconfigRootDir: getTsconfigPath('apps/web'),
+        project: [getTsconfigPath('apps/web/tsconfig.eslint.json')],
       },
     },
     rules: {
@@ -160,12 +159,21 @@ export default tseslint.config(
 
   // 8. API 应用特定配置 (apps/api)
   {
-    files: ['apps/api/**/*.ts'],
+    files: ['apps/api/src/**/*.ts'],
     languageOptions: {
       globals: globals.node,
       parserOptions: {
-        projectService: true,
-        tsconfigRootDir: getTsconfigPath('apps/api'),
+        project: [getTsconfigPath('apps/api/tsconfig.eslint.json')],
+      },
+    },
+  },
+
+  {
+    files: ['apps/api/drizzle.config.ts'],
+    languageOptions: {
+      globals: globals.node,
+      parserOptions: {
+        project: [getTsconfigPath('apps/api/tsconfig.node.json')],
       },
     },
   },
@@ -193,8 +201,7 @@ export default tseslint.config(
     files: ['packages/editor/**/*.{ts,tsx}'],
     languageOptions: {
       parserOptions: {
-        projectService: true,
-        tsconfigRootDir: getTsconfigPath('packages/editor'),
+        project: [getTsconfigPath('packages/editor/tsconfig.eslint.json')],
       },
     },
   },

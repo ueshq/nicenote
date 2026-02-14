@@ -19,7 +19,7 @@ interface NotesSidebarProps {
   isResizing: boolean
   openSidebar: () => void
   toggleSidebar: () => void
-  startResizing: (event: React.MouseEvent<HTMLDivElement>) => void
+  startResizing: (event: React.PointerEvent<HTMLDivElement>) => void
   cancelPendingSave: (id: string) => void
 }
 
@@ -208,14 +208,13 @@ export function NotesSidebar({
         </div>
         {!isMobile && (
           <div
-            className="absolute top-0 right-0 z-50 h-full w-px cursor-col-resize bg-border transition-all duration-100 hover:bg-primary"
-            onMouseDown={startResizing}
+            className={`absolute top-0 right-0 z-50 h-full cursor-col-resize bg-border transition-all duration-100 hover:bg-primary ${
+              isResizing ? 'w-0.75' : 'w-px hover:w-0.75'
+            }`}
+            onPointerDown={startResizing}
             style={{
-              width: isResizing ? '3px' : '1px',
               right: isResizing ? '-1.5px' : '-0.5px',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.width = '3px')}
-            onMouseLeave={(e) => (e.currentTarget.style.width = isResizing ? '3px' : '1px')}
           />
         )}
       </aside>

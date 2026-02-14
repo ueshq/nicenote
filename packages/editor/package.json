@@ -31,7 +31,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "echo 'Editor package - no dev script needed'",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "vitest run"
   },
   "type": "module"
 }

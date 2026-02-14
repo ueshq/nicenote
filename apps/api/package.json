@@ -20,7 +20,8 @@
     "db:studio": "drizzle-kit studio",
     "deploy": "wrangler deploy --minify",
     "dev": "wrangler dev",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "vitest run"
   },
   "type": "module"
 }
