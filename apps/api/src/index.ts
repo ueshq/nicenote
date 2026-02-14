@@ -15,12 +15,11 @@ app.use('*', (c, next) => {
 app.use(
   '*',
   cors({
-    origin: ['https://nicenote.app', 'https://nicenote.pages.dev', 'http://localhost:5173'],
+    origin: '*',
     allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
     exposeHeaders: ['Content-Length'],
     maxAge: 600,
-    credentials: true,
   })
 )
 
