@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+z.config({ jitless: true })
+
 const isoDateTimeSchema = z.string().datetime({ offset: true })
 
 const MAX_TITLE_LENGTH = 500
