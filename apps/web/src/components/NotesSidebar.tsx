@@ -1,4 +1,4 @@
-import { memo, useCallback, useDeferredValue, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { Locale } from 'date-fns'
@@ -12,18 +12,13 @@ import { useMinuteTicker } from '../hooks/useMinuteTicker'
 import { WEB_ICON_MD_CLASS, WEB_ICON_SM_CLASS, WEB_ROW_WITH_ICON_CLASS } from '../lib/class-names'
 import { getDateLocale } from '../lib/date-locale'
 import { useNoteStore } from '../store/useNoteStore'
+import { useSidebarStore } from '../store/useSidebarStore'
 import { useToastStore } from '../store/useToastStore'
 
 import { SettingsDropdown } from './SettingsDropdown'
 
 interface NotesSidebarProps {
-  isSidebarOpen: boolean
   isMobile: boolean
-  sidebarWidth: number
-  isResizing: boolean
-  openSidebar: () => void
-  toggleSidebar: () => void
-  startResizing: (event: React.PointerEvent<HTMLDivElement>) => void
   cancelPendingSave: (id: string) => void
 }
 
@@ -57,7 +52,7 @@ const NoteListItem = memo(function NoteListItem({
     >
       <button
         onClick={() => onSelect(note)}
-        className="w-full cursor-pointer text-left focus-visible:rounded-md focus-visible:ring-2 focus-visible:ring-primary/50"
+        className="w-full cursor-pointer text-left outline-none"
       >
         <div className="flex items-center gap-2 pr-8">
           <div className={`${WEB_ROW_WITH_ICON_CLASS} overflow-hidden`}>
@@ -89,20 +84,26 @@ const NoteListItem = memo(function NoteListItem({
   )
 })
 
-export function NotesSidebar({
-  isSidebarOpen,
-  isMobile,
-  sidebarWidth,
-  isResizing,
-  openSidebar,
-  toggleSidebar,
-  startResizing,
-  cancelPendingSave,
-}: NotesSidebarProps) {
+export function NotesSidebar({ isMobile, cancelPendingSave }: NotesSidebarProps) {
   const { t, i18n } = useTranslation()
   useMinuteTicker()
   const [search, setSearch] = useState('')
   const deferredSearch = useDeferredValue(search)
+
+  const { isOpen, width, isResizing, toggle, open, setWidth, startResize, stopResize } =
+    useSidebarStore(
+      useShallow((s) => ({
+        isOpen: s.isOpen,
+        width: s.width,
+        isResizing: s.isResizing,
+        toggle: s.toggle,
+        open: s.open,
+        setWidth: s.setWidth,
+        startResize: s.startResize,
+        stopResize: s.stopResize,
+      }))
+    )
+
   const {
     notes,
     isFetching,
@@ -132,6 +133,14 @@ export function NotesSidebar({
 
   const pendingDeleteTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
 
+  const handleSelectNote = useCallback(
+    (note: NoteListItemType) => {
+      void selectNote(note)
+      if (isMobile) useSidebarStore.getState().close()
+    },
+    [selectNote, isMobile]
+  )
+
   const handleDeleteWithUndo = useCallback(
     (id: string) => {
       cancelPendingSave(id)
@@ -139,13 +148,11 @@ export function NotesSidebar({
       const noteToDelete = notes.find((n) => n.id === id)
       if (!noteToDelete) return
 
-      // Optimistically remove from UI
       useNoteStore.setState((state) => ({
         notes: state.notes.filter((n) => n.id !== id),
         currentNote: state.currentNote?.id === id ? null : state.currentNote,
       }))
 
-      // Start a grace period before actually sending the DELETE to the server
       const deleteTimer = setTimeout(() => {
         pendingDeleteTimers.current.delete(id)
         void deleteNote(id)
@@ -163,7 +170,6 @@ export function NotesSidebar({
               clearTimeout(timer)
               pendingDeleteTimers.current.delete(id)
             }
-            // Restore the note in the store
             useNoteStore.setState((state) => ({
               notes: [...state.notes, noteToDelete],
             }))
@@ -174,7 +180,6 @@ export function NotesSidebar({
     [cancelPendingSave, notes, deleteNote, addToast, t]
   )
 
-  // #25: Stabilize sort — only re-sort when updatedAt ordering actually changes
   const sortedNoteIds = useMemo(() => {
     return [...notes]
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
@@ -196,111 +201,182 @@ export function NotesSidebar({
       .filter((note) => note && note.title.toLowerCase().includes(normalizedSearch))
   }, [deferredSearch, sortedNoteIds, notesById])
 
-  return (
+  // Resize pointer handling
+  const handleResizePointerDown = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      e.preventDefault()
+      e.currentTarget.setPointerCapture(e.pointerId)
+      startResize()
+    },
+    [startResize]
+  )
+
+  const handleResizePointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!isResizing) return
+      setWidth(e.clientX)
+    },
+    [isResizing, setWidth]
+  )
+
+  const handleResizePointerUp = useCallback(() => {
+    if (!isResizing) return
+    stopResize()
+  }, [isResizing, stopResize])
+
+  // Disable text selection during resize
+  useEffect(() => {
+    if (isResizing) {
+      document.body.style.userSelect = 'none'
+      return () => {
+        document.body.style.userSelect = ''
+      }
+    }
+  }, [isResizing])
+
+  const sidebarContent = (
     <>
-      {!isSidebarOpen && (
+      <div className="flex flex-col gap-4 p-4">
+        <div className="flex items-center justify-between">
+          <div className={WEB_ROW_WITH_ICON_CLASS}>
+            <button
+              onClick={toggle}
+              aria-label={isOpen ? t('sidebar.closeSidebar') : t('sidebar.openSidebar')}
+              className="rounded-md p-1.5 transition-colors outline-none hover:bg-accent"
+            >
+              <ArrowRightFromLine
+                className={`${WEB_ICON_MD_CLASS} transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+            <h1 className="text-xl font-semibold">Nicenote</h1>
+          </div>
+          <div className={WEB_ROW_WITH_ICON_CLASS}>
+            <SettingsDropdown />
+            <button
+              onClick={() => void createNote()}
+              disabled={isCreating}
+              aria-label={t('sidebar.newNote')}
+              className="rounded-md bg-primary p-2 text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            >
+              <Plus className={WEB_ICON_SM_CLASS} />
+            </button>
+          </div>
+        </div>
+        <div className="relative">
+          <Search
+            className={`absolute top-2.5 left-2.5 ${WEB_ICON_SM_CLASS} text-muted-foreground`}
+          />
+          <input
+            type="search"
+            placeholder={t('sidebar.searchNotes')}
+            aria-label={t('sidebar.searchNotesLabel')}
+            className="w-full py-2 pr-4 pl-9 text-sm outline-none"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <ul role="list" className="flex-1 space-y-1 overflow-y-auto p-2">
+        {isFetching && notes.length === 0
+          ? Array.from({ length: 6 }).map((_, i) => (
+              <li key={i} className="animate-pulse space-y-2 rounded-md p-3">
+                <div className={WEB_ROW_WITH_ICON_CLASS}>
+                  <div className={`${WEB_ICON_SM_CLASS} rounded bg-muted`} />
+                  <div className="h-4 w-2/3 rounded bg-muted" />
+                </div>
+                <div className="ml-6 h-3 w-1/2 rounded bg-muted" />
+              </li>
+            ))
+          : filteredNotes.map((note) => (
+              <NoteListItem
+                key={note.id}
+                note={note}
+                isActive={currentNoteId === note.id}
+                onSelect={handleSelectNote}
+                onDelete={handleDeleteWithUndo}
+                untitledLabel={untitledLabel}
+                deleteLabel={deleteLabel}
+                dateLocale={dateLocale}
+              />
+            ))}
+        {!isFetching && error && notes.length === 0 && (
+          <li className="py-12 text-center text-destructive">
+            <p className="text-sm">{error}</p>
+          </li>
+        )}
+        {!isFetching && !error && filteredNotes.length === 0 && (
+          <li className="py-12 text-center text-muted-foreground">
+            <p className="text-sm">{t('sidebar.noNotesFound')}</p>
+          </li>
+        )}
+      </ul>
+    </>
+  )
+
+  if (isMobile) {
+    return (
+      <>
+        {!isOpen && (
+          <button
+            onClick={open}
+            aria-label={t('sidebar.openSidebar')}
+            className="fixed top-4 left-4 z-50 rounded-md bg-background p-2 shadow-sm transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary/50"
+          >
+            <ArrowRightFromLine className={WEB_ICON_MD_CLASS} />
+          </button>
+        )}
+        <aside
+          className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-muted transition-transform duration-300 ease-in-out ${
+            isOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+          style={{ width: 280 }}
+        >
+          {sidebarContent}
+        </aside>
+      </>
+    )
+  }
+
+  return (
+    <aside className="relative flex h-full flex-col overflow-hidden border-r border-border bg-muted">
+      {/* Collapsed: toggle button centered in 48px strip */}
+      <div
+        className={`absolute inset-y-0 left-0 flex w-12 justify-center pt-4 transition-opacity duration-200 ${
+          isOpen ? 'pointer-events-none opacity-0' : 'opacity-100'
+        }`}
+      >
         <button
-          onClick={openSidebar}
+          onClick={toggle}
           aria-label={t('sidebar.openSidebar')}
-          className="fixed top-4 left-4 z-50 rounded-md bg-background p-2 shadow-sm transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary/50"
+          className="h-fit rounded-md p-1.5 transition-colors outline-none hover:bg-accent"
         >
           <ArrowRightFromLine className={WEB_ICON_MD_CLASS} />
         </button>
-      )}
+      </div>
 
-      <aside
-        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-background transition-transform duration-300 ease-in-out ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      {/* Expanded: full sidebar content with fixed min-width to prevent reflow */}
+      <div
+        className={`flex flex-1 flex-col overflow-hidden transition-opacity duration-200 ${
+          isOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
-        style={{ width: `${sidebarWidth}px` }}
+        style={{ minWidth: width }}
       >
-        <div className="flex flex-col gap-4 p-4">
-          <div className="flex items-center justify-between">
-            <div className={WEB_ROW_WITH_ICON_CLASS}>
-              <button
-                onClick={toggleSidebar}
-                aria-label={isSidebarOpen ? t('sidebar.closeSidebar') : t('sidebar.openSidebar')}
-                className="rounded-md p-1.5 transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary/50"
-              >
-                <ArrowRightFromLine
-                  className={`${WEB_ICON_MD_CLASS} transition-transform duration-300 ${isSidebarOpen ? 'rotate-180' : ''}`}
-                />
-              </button>
-              <h1 className="text-xl font-semibold">Nicenote</h1>
-            </div>
-            <div className={WEB_ROW_WITH_ICON_CLASS}>
-              <SettingsDropdown />
-              <button
-                onClick={() => void createNote()}
-                disabled={isCreating}
-                aria-label={t('sidebar.newNote')}
-                className="rounded-md bg-primary p-2 text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
-              >
-                <Plus className={WEB_ICON_SM_CLASS} />
-              </button>
-            </div>
-          </div>
-          <div className="relative">
-            <Search
-              className={`absolute top-2.5 left-2.5 ${WEB_ICON_SM_CLASS} text-muted-foreground`}
-            />
-            <input
-              type="search"
-              placeholder={t('sidebar.searchNotes')}
-              aria-label={t('sidebar.searchNotesLabel')}
-              className="w-full py-2 pr-4 pl-9 text-sm"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-        </div>
+        {sidebarContent}
+      </div>
 
-        <ul role="list" className="flex-1 space-y-1 overflow-y-auto p-2">
-          {isFetching && notes.length === 0
-            ? Array.from({ length: 6 }).map((_, i) => (
-                <li key={i} className="animate-pulse space-y-2 rounded-md p-3">
-                  <div className={WEB_ROW_WITH_ICON_CLASS}>
-                    <div className={`${WEB_ICON_SM_CLASS} rounded bg-muted`} />
-                    <div className="h-4 w-2/3 rounded bg-muted" />
-                  </div>
-                  <div className="ml-6 h-3 w-1/2 rounded bg-muted" />
-                </li>
-              ))
-            : filteredNotes.map((note) => (
-                <NoteListItem
-                  key={note.id}
-                  note={note}
-                  isActive={currentNoteId === note.id}
-                  onSelect={selectNote}
-                  onDelete={handleDeleteWithUndo}
-                  untitledLabel={untitledLabel}
-                  deleteLabel={deleteLabel}
-                  dateLocale={dateLocale}
-                />
-              ))}
-          {!isFetching && error && notes.length === 0 && (
-            <li className="py-12 text-center text-destructive">
-              <p className="text-sm">{error}</p>
-            </li>
-          )}
-          {!isFetching && !error && filteredNotes.length === 0 && (
-            <li className="py-12 text-center text-muted-foreground">
-              <p className="text-sm">{t('sidebar.noNotesFound')}</p>
-            </li>
-          )}
-        </ul>
-        {!isMobile && (
-          <div
-            className={`absolute top-0 right-0 z-50 h-full cursor-col-resize bg-border transition-all duration-100 hover:bg-primary ${
-              isResizing ? 'w-0.75' : 'w-px hover:w-0.75'
-            }`}
-            onPointerDown={startResizing}
-            style={{
-              right: isResizing ? '-1.5px' : '-0.5px',
-            }}
-          />
-        )}
-      </aside>
-    </>
+      {isOpen && (
+        <div
+          className={`absolute top-0 right-0 z-50 h-full cursor-col-resize bg-border transition-all duration-100 hover:bg-primary ${
+            isResizing ? 'w-0.75' : 'w-px hover:w-0.75'
+          }`}
+          style={{ right: isResizing ? '-1.5px' : '-0.5px' }}
+          onPointerDown={handleResizePointerDown}
+          onPointerMove={handleResizePointerMove}
+          onPointerUp={handleResizePointerUp}
+          onPointerCancel={handleResizePointerUp}
+        />
+      )}
+    </aside>
   )
 }

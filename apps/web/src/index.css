@@ -18,8 +18,7 @@
 
   input:focus,
   textarea:focus,
-  select:focus,
-  button:focus {
+  select:focus {
     @apply focus:ring-1 focus:ring-ring focus:outline-none;
   }
 

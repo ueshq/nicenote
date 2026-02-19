@@ -16,20 +16,12 @@ import { getDateLocale } from '../lib/date-locale'
 import { useNoteStore } from '../store/useNoteStore'
 
 interface NoteEditorPaneProps {
-  isSidebarOpen: boolean
-  sidebarWidth: number
   scheduleSave: (id: string, updates: NoteUpdateInput) => void
   saveStatus: SaveStatus
   inert?: boolean
 }
 
-export function NoteEditorPane({
-  isSidebarOpen,
-  sidebarWidth,
-  scheduleSave,
-  saveStatus,
-  inert,
-}: NoteEditorPaneProps) {
+export function NoteEditorPane({ scheduleSave, saveStatus, inert }: NoteEditorPaneProps) {
   const { t, i18n } = useTranslation()
   useMinuteTicker()
   const { currentNote, createNote, updateNoteLocal } = useNoteStore(
@@ -114,20 +106,13 @@ export function NoteEditorPane({
   }, [updatedAt, dateLocale, t])
 
   return (
-    <main
-      className="flex flex-1 flex-col duration-300 ease-in-out"
-      style={{
-        marginLeft: isSidebarOpen ? `${sidebarWidth}px` : 0,
-        transitionProperty: 'margin-left',
-      }}
-      {...(inert ? { inert: true } : {})}
-    >
+    <main className="flex min-w-0 flex-1 flex-col" {...(inert ? { inert: true } : {})}>
       {currentNote ? (
         <>
           <div className="px-8 pt-12 pb-4">
             <input
               type="text"
-              className="w-full border-none text-4xl font-bold outline-none placeholder:text-muted-foreground/30 focus-visible:ring-2 focus-visible:ring-primary/50"
+              className="w-full border-none text-4xl font-bold ring-0 outline-none placeholder:text-muted-foreground/30"
               placeholder={t('editor.noteTitle')}
               aria-label={t('editor.noteTitleLabel')}
               value={currentNote.title}
@@ -142,6 +127,7 @@ export function NoteEditorPane({
           </div>
           <div className="flex-1 overflow-hidden px-8 pb-8">
             <NicenoteEditor
+              key={currentNote.id}
               value={currentNote.content ?? ''}
               onChange={handleContentChange}
               labels={editorLabels}
