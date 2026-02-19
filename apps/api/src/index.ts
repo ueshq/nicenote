@@ -3,6 +3,7 @@ import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 
 import { createNoteService, type NoteServiceBindings } from './services/note-service'
+import { resolveLocale, t } from './i18n'
 import { registerNoteRoutes } from './routes'
 
 const app = new Hono<{ Bindings: NoteServiceBindings }>()
@@ -23,7 +24,7 @@ app.use(
   cors({
     origin: (origin) => (ALLOWED_ORIGINS.includes(origin) ? origin : null),
     allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
+    allowHeaders: ['Content-Type', 'Authorization', 'Accept-Language'],
     exposeHeaders: [
       'Content-Length',
       'X-RateLimit-Limit',
@@ -66,7 +67,8 @@ app.use('*', async (c, next) => {
 
   if (timestamps.length >= RATE_LIMIT_MAX) {
     setRateLimitHeaders()
-    return c.json({ error: 'Too Many Requests' }, 429)
+    const locale = resolveLocale(c.req.header('accept-language'))
+    return c.json({ error: t('tooManyRequests', locale) }, 429)
   }
 
   timestamps.push(now)
@@ -77,7 +79,8 @@ app.use('*', async (c, next) => {
 // 全局错误处理
 app.onError((err, c) => {
   console.error(err)
-  return c.json({ error: 'Internal Server Error' }, 500)
+  const locale = resolveLocale(c.req.header('accept-language'))
+  return c.json({ error: t('internalServerError', locale) }, 500)
 })
 
 app.get('/', (c) => c.json({ status: 'ok', message: 'Nicenote API is running' }))

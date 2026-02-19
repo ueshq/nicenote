@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { debounce, type NoteSelect, type NoteUpdateInput } from '@nicenote/shared'
 
+import i18n from '../i18n'
 import { useToastStore } from '../store/useToastStore'
 
 const MAX_RETRIES = 3
@@ -91,7 +92,7 @@ export function useDebouncedNoteSave({ saveNote, delayMs = 1000 }: UseDebouncedN
         current.saving = false
       }
       setSaveStatus('unsaved')
-      addToastRef.current('Failed to save note. Your changes may not be persisted.')
+      addToastRef.current(i18n.t('toast.failedToSave'))
     }
   }, [])
 

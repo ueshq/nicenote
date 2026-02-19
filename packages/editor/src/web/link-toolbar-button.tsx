@@ -21,6 +21,9 @@ export function LinkToolbarButton({
   isMobile,
   label,
   shortcut,
+  cancelLabel = 'Cancel',
+  applyLabel = 'Apply',
+  translateValidationError,
 }: {
   editor: Editor | null
   snapshot: NoteEditorStateSnapshot
@@ -28,12 +31,18 @@ export function LinkToolbarButton({
   isMobile: boolean
   label: string
   shortcut?: string
+  cancelLabel?: string | undefined
+  applyLabel?: string | undefined
+  translateValidationError?: ((key: string) => string) | undefined
 }) {
   const [open, setOpen] = useState(false)
   const [hrefInput, setHrefInput] = useState('https://')
   const linkActive = snapshot.marks.link
   const disabled = !editor || isSourceMode
-  const validationError = getLinkValidationError(hrefInput)
+  const validationErrorKey = getLinkValidationError(hrefInput)
+  const validationError = validationErrorKey
+    ? (translateValidationError?.(validationErrorKey) ?? validationErrorKey)
+    : null
 
   useEffect(() => {
     if (!open || !editor) return
@@ -82,7 +91,7 @@ export function LinkToolbarButton({
           className="space-y-2"
           onSubmit={(event) => {
             event.preventDefault()
-            if (!editor || validationError) return
+            if (!editor || validationErrorKey) return
             setLinkHref(editor, hrefInput.trim())
             setOpen(false)
           }}
@@ -109,15 +118,15 @@ export function LinkToolbarButton({
                 setOpen(false)
               }}
             >
-              取消
+              {cancelLabel}
             </Button>
             <Button
               type="submit"
               data-style="primary"
               showTooltip={false}
-              disabled={Boolean(validationError)}
+              disabled={Boolean(validationErrorKey)}
             >
-              应用
+              {applyLabel}
             </Button>
           </div>
         </form>

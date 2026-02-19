@@ -9,6 +9,7 @@
 // ============================================================
 export { debounce, throttle } from './debounce'
 export { toKebabCase } from './parsers'
+export type { LinkValidationErrorKey } from './validators'
 export { getLinkValidationError } from './validators'
 
 // ============================================================

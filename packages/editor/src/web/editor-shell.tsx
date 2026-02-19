@@ -5,6 +5,8 @@ import { EditorContext, useEditor } from '@tiptap/react'
 
 import { useIsBreakpoint } from '@nicenote/ui'
 
+import type { EditorLabels } from '../core/labels'
+import { DEFAULT_EDITOR_LABELS } from '../core/labels'
 import {
   hasEditorMarkdownChanged,
   normalizeMarkdownContent,
@@ -29,6 +31,7 @@ export interface NicenoteEditorProps {
   isSourceMode?: boolean
   onSourceModeChange?: (enabled: boolean) => void
   className?: string
+  labels?: EditorLabels
 }
 
 function useSourceModeState(props: {
@@ -65,7 +68,9 @@ export function NicenoteEditor({
   isSourceMode: controlledSourceMode,
   onSourceModeChange,
   className,
+  labels,
 }: NicenoteEditorProps) {
+  const resolvedLabels = labels ?? DEFAULT_EDITOR_LABELS
   const initialMarkdown = useMemo(() => normalizeMarkdownContent(value), [value])
   const isMobile = useIsBreakpoint()
   const isApplyingExternalContent = useRef(false)
@@ -81,12 +86,13 @@ export function NicenoteEditor({
     onSourceModeChange,
   })
 
+  const placeholderText = resolvedLabels.content.editorPlaceholder
   const extensions = useMemo(
     () =>
       createMinimalExtensions({
-        placeholder: NOTE_BEHAVIOR_POLICY.placeholder,
+        placeholder: placeholderText,
       }),
-    []
+    [placeholderText]
   )
 
   const updateSnapshot = useCallback((nextEditor: Editor | null) => {
@@ -191,6 +197,8 @@ export function NicenoteEditor({
           isSourceMode={isSourceMode}
           isMobile={isMobile}
           onToggleSourceMode={toggleSourceMode}
+          toolbarLabels={resolvedLabels.toolbar}
+          translateValidationError={resolvedLabels.translateValidationError}
         />
         <NicenoteEditorContent
           editor={editor}
@@ -198,6 +206,8 @@ export function NicenoteEditor({
           sourceValue={sourceValue}
           onSourceChange={setSourceValue}
           onSourceBlur={commitSourceValue}
+          ariaLabel={resolvedLabels.content.sourceLabel}
+          sourcePlaceholder={resolvedLabels.content.sourcePlaceholder}
         />
       </EditorContext.Provider>
     </section>

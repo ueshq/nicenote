@@ -7,6 +7,8 @@ interface NicenoteEditorContentProps {
   sourceValue: string
   onSourceChange: (nextValue: string) => void
   onSourceBlur: () => void
+  ariaLabel?: string
+  sourcePlaceholder?: string
 }
 
 export function NicenoteEditorContent({
@@ -15,17 +17,19 @@ export function NicenoteEditorContent({
   sourceValue,
   onSourceChange,
   onSourceBlur,
+  ariaLabel = 'Note content',
+  sourcePlaceholder = 'Enter Markdown content',
 }: NicenoteEditorContentProps) {
   if (isSourceMode) {
     return (
       <textarea
         className="nn-editor-source"
-        aria-label="Note content"
+        aria-label={ariaLabel}
         spellCheck={false}
         value={sourceValue}
         onChange={(event) => onSourceChange(event.target.value)}
         onBlur={onSourceBlur}
-        placeholder="请输入 Markdown 内容"
+        placeholder={sourcePlaceholder}
       />
     )
   }

@@ -21,6 +21,7 @@ import {
 import { Separator, Toolbar, ToolbarGroup } from '@nicenote/ui'
 
 import { isNoteCommandId, type NoteCommandId, runNoteCommand } from '../core/commands'
+import type { EditorToolbarLabels } from '../core/labels'
 import type { NoteEditorStateSnapshot } from '../core/state'
 import {
   HEADING_MENU_ITEMS,
@@ -39,6 +40,8 @@ interface MinimalToolbarProps {
   isSourceMode: boolean
   isMobile: boolean
   onToggleSourceMode: () => void
+  toolbarLabels: EditorToolbarLabels
+  translateValidationError?: ((key: string) => string) | undefined
 }
 
 interface ToolbarItemRenderState {
@@ -138,23 +141,27 @@ function isListMenuActive(snapshot: NoteEditorStateSnapshot): boolean {
   return snapshot.nodes.bulletList || snapshot.nodes.orderedList
 }
 
-function getHeadingMenuLabel(snapshot: NoteEditorStateSnapshot): string {
-  if (snapshot.nodes.heading3) return '标题3'
-  if (snapshot.nodes.heading2) return '标题2'
-  if (snapshot.nodes.heading1) return '标题1'
-  return '标题'
+function getHeadingMenuLabel(
+  snapshot: NoteEditorStateSnapshot,
+  labels: EditorToolbarLabels
+): string {
+  if (snapshot.nodes.heading3) return labels.heading3
+  if (snapshot.nodes.heading2) return labels.heading2
+  if (snapshot.nodes.heading1) return labels.heading1
+  return labels.heading
 }
 
-function getListMenuLabel(snapshot: NoteEditorStateSnapshot): string {
-  if (snapshot.nodes.orderedList) return '有序列表'
-  if (snapshot.nodes.bulletList) return '无序列表'
-  return '列表'
+function getListMenuLabel(snapshot: NoteEditorStateSnapshot, labels: EditorToolbarLabels): string {
+  if (snapshot.nodes.orderedList) return labels.orderedList
+  if (snapshot.nodes.bulletList) return labels.bulletList
+  return labels.list
 }
 
 function resolveCommandDropdownOption(
   option: NoteToolbarItem,
   editor: Editor | null,
-  snapshot: NoteEditorStateSnapshot
+  snapshot: NoteEditorStateSnapshot,
+  labels: EditorToolbarLabels
 ) {
   if (!isNoteCommandId(option.id) || !editor) {
     return null
@@ -167,7 +174,7 @@ function resolveCommandDropdownOption(
 
   return {
     key: commandId,
-    label: option.label,
+    label: labels[option.labelKey],
     disabled,
     active,
     icon: <OptionIcon className="nn-editor-toolbar-icon" />,
@@ -223,6 +230,8 @@ export function MinimalToolbar({
   isSourceMode,
   isMobile,
   onToggleSourceMode,
+  toolbarLabels,
+  translateValidationError,
 }: MinimalToolbarProps) {
   return (
     <Toolbar variant="floating" className="nn-editor-toolbar">
@@ -230,19 +239,20 @@ export function MinimalToolbar({
         <Fragment key={groupIndex}>
           <ToolbarGroup>
             {group.map((item) => {
+              const label = toolbarLabels[item.labelKey]
               switch (item.id) {
                 case 'headingMenu':
                   return (
                     <CommandDropdownMenu
                       key={item.id}
-                      triggerLabel={getHeadingMenuLabel(snapshot)}
+                      triggerLabel={getHeadingMenuLabel(snapshot, toolbarLabels)}
                       triggerIcon={getHeadingMenuIcon(snapshot)}
                       triggerActive={isHeadingMenuActive(snapshot)}
                       triggerDisabled={!editor || isSourceMode}
                       isMobile={isMobile}
                       options={HEADING_MENU_ITEMS}
                       resolveOption={(option) =>
-                        resolveCommandDropdownOption(option, editor, snapshot)
+                        resolveCommandDropdownOption(option, editor, snapshot, toolbarLabels)
                       }
                     />
                   )
@@ -250,14 +260,14 @@ export function MinimalToolbar({
                   return (
                     <CommandDropdownMenu
                       key={item.id}
-                      triggerLabel={getListMenuLabel(snapshot)}
+                      triggerLabel={getListMenuLabel(snapshot, toolbarLabels)}
                       triggerIcon={getListMenuIcon(snapshot)}
                       triggerActive={isListMenuActive(snapshot)}
                       triggerDisabled={!editor || isSourceMode}
                       isMobile={isMobile}
                       options={LIST_MENU_ITEMS}
                       resolveOption={(option) =>
-                        resolveCommandDropdownOption(option, editor, snapshot)
+                        resolveCommandDropdownOption(option, editor, snapshot, toolbarLabels)
                       }
                     />
                   )
@@ -269,7 +279,10 @@ export function MinimalToolbar({
                       snapshot={snapshot}
                       isSourceMode={isSourceMode}
                       isMobile={isMobile}
-                      label={item.label}
+                      label={label}
+                      cancelLabel={toolbarLabels.cancel}
+                      applyLabel={toolbarLabels.apply}
+                      translateValidationError={translateValidationError}
                       {...(item.shortcut ? { shortcut: item.shortcut } : {})}
                     />
                   )
@@ -293,7 +306,7 @@ export function MinimalToolbar({
                   return (
                     <ActionToolbarButton
                       key={item.id}
-                      label={item.label}
+                      label={label}
                       isMobile={isMobile}
                       active={active}
                       disabled={disabled}

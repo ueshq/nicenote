@@ -18,6 +18,15 @@ vi.mock('../lib/api', () => ({
   api: mockApi,
 }))
 
+vi.mock('../i18n', () => ({
+  default: {
+    t: (key: string, opts?: Record<string, unknown>) => {
+      if (opts && 'status' in opts) return `${key} (${opts.status})`
+      return key
+    },
+  },
+}))
+
 import { useNoteStore } from './useNoteStore'
 
 function resetStore() {

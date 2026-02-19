@@ -2,6 +2,7 @@ import { create } from 'zustand'
 
 import type { NoteListItem, NoteSelect, NoteUpdateInput } from '@nicenote/shared'
 
+import i18n from '../i18n'
 import { api } from '../lib/api'
 
 interface NoteStore {
@@ -86,10 +87,10 @@ export const useNoteStore = create<NoteStore>((set) => ({
         const json = await res.json()
         set({ notes: normalizeNoteList(json.data) })
       } else {
-        set({ error: `Failed to fetch notes (${res.status})` })
+        set({ error: i18n.t('store.failedToFetchNotes', { status: res.status }) })
       }
     } catch {
-      set({ error: 'Network error while fetching notes' })
+      set({ error: i18n.t('store.networkErrorFetchNotes') })
     } finally {
       set({ isFetching: false })
     }
@@ -106,10 +107,10 @@ export const useNoteStore = create<NoteStore>((set) => ({
         const full = normalizeNote(await res.json())
         set({ currentNote: full })
       } else {
-        set({ error: `Failed to fetch note (${res.status})` })
+        set({ error: i18n.t('store.failedToFetchNote', { status: res.status }) })
       }
     } catch {
-      set({ error: 'Network error while fetching note' })
+      set({ error: i18n.t('store.networkErrorFetchNote') })
     }
   },
 
@@ -122,7 +123,7 @@ export const useNoteStore = create<NoteStore>((set) => ({
       if (res.ok) {
         const newNote = normalizeNote(await res.json())
         if (!newNote) {
-          set({ error: 'Failed to parse created note response' })
+          set({ error: i18n.t('store.failedToParseNote') })
           return
         }
 
@@ -138,10 +139,10 @@ export const useNoteStore = create<NoteStore>((set) => ({
           currentNote: newNote,
         }))
       } else {
-        set({ error: `Failed to create note (${res.status})` })
+        set({ error: i18n.t('store.failedToCreateNote', { status: res.status }) })
       }
     } catch {
-      set({ error: 'Network error while creating note' })
+      set({ error: i18n.t('store.networkErrorCreateNote') })
     } finally {
       set({ isCreating: false })
     }
@@ -202,10 +203,10 @@ export const useNoteStore = create<NoteStore>((set) => ({
           currentNote: state.currentNote?.id === id ? null : state.currentNote,
         }))
       } else {
-        set({ error: `Failed to delete note (${res.status})` })
+        set({ error: i18n.t('store.failedToDeleteNote', { status: res.status }) })
       }
     } catch {
-      set({ error: 'Network error while deleting note' })
+      set({ error: i18n.t('store.networkErrorDeleteNote') })
     }
   },
 }))

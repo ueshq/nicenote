@@ -1,23 +1,19 @@
 import { useCallback, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { formatDistanceToNow } from 'date-fns'
 import { FileText, Plus } from 'lucide-react'
 import { useShallow } from 'zustand/react/shallow'
 
+import type { EditorLabels } from '@nicenote/editor'
 import { NicenoteEditor } from '@nicenote/editor'
 import type { NoteUpdateInput } from '@nicenote/shared'
 
 import type { SaveStatus } from '../hooks/useDebouncedNoteSave'
 import { useMinuteTicker } from '../hooks/useMinuteTicker'
 import { WEB_ICON_SM_CLASS } from '../lib/class-names'
+import { getDateLocale } from '../lib/date-locale'
 import { useNoteStore } from '../store/useNoteStore'
-
-const saveStatusLabel: Record<SaveStatus, string | null> = {
-  idle: null,
-  unsaved: 'Unsaved changes',
-  saving: 'Saving\u2026',
-  saved: 'Saved',
-}
 
 interface NoteEditorPaneProps {
   isSidebarOpen: boolean
@@ -34,6 +30,7 @@ export function NoteEditorPane({
   saveStatus,
   inert,
 }: NoteEditorPaneProps) {
+  const { t, i18n } = useTranslation()
   useMinuteTicker()
   const { currentNote, createNote, updateNoteLocal } = useNoteStore(
     useShallow((state) => ({
@@ -41,6 +38,50 @@ export function NoteEditorPane({
       createNote: state.createNote,
       updateNoteLocal: state.updateNoteLocal,
     }))
+  )
+
+  const saveStatusLabel: Record<SaveStatus, string | null> = useMemo(
+    () => ({
+      idle: null,
+      unsaved: t('saveStatus.unsaved'),
+      saving: t('saveStatus.saving'),
+      saved: t('saveStatus.saved'),
+    }),
+    [t]
+  )
+
+  const dateLocale = useMemo(() => getDateLocale(i18n.language), [i18n.language])
+
+  const editorLabels: EditorLabels = useMemo(
+    () => ({
+      toolbar: {
+        undo: t('toolbar.undo'),
+        redo: t('toolbar.redo'),
+        heading: t('toolbar.heading'),
+        heading1: t('toolbar.heading1'),
+        heading2: t('toolbar.heading2'),
+        heading3: t('toolbar.heading3'),
+        list: t('toolbar.list'),
+        bulletList: t('toolbar.bulletList'),
+        orderedList: t('toolbar.orderedList'),
+        bold: t('toolbar.bold'),
+        italic: t('toolbar.italic'),
+        strike: t('toolbar.strike'),
+        code: t('toolbar.code'),
+        blockquote: t('toolbar.blockquote'),
+        link: t('toolbar.link'),
+        sourceMode: t('toolbar.sourceMode'),
+        cancel: t('toolbar.cancel'),
+        apply: t('toolbar.apply'),
+      },
+      content: {
+        editorPlaceholder: t('editorContent.editorPlaceholder'),
+        sourcePlaceholder: t('editorContent.sourcePlaceholder'),
+        sourceLabel: t('editorContent.sourceLabel'),
+      },
+      translateValidationError: (key: string) => t(key),
+    }),
+    [t]
   )
 
   const handleTitleChange = useCallback(
@@ -65,8 +106,12 @@ export function NoteEditorPane({
   const updatedAt = currentNote?.updatedAt ?? null
   const updatedAtLabel = useMemo(() => {
     if (!updatedAt) return null
-    return `Updated ${formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}`
-  }, [updatedAt])
+    const time = formatDistanceToNow(new Date(updatedAt), {
+      addSuffix: true,
+      locale: dateLocale,
+    })
+    return t('editor.updated', { time })
+  }, [updatedAt, dateLocale, t])
 
   return (
     <main
@@ -83,8 +128,8 @@ export function NoteEditorPane({
             <input
               type="text"
               className="w-full border-none text-4xl font-bold outline-none placeholder:text-muted-foreground/30 focus-visible:ring-2 focus-visible:ring-primary/50"
-              placeholder="Note Title"
-              aria-label="Note title"
+              placeholder={t('editor.noteTitle')}
+              aria-label={t('editor.noteTitleLabel')}
               value={currentNote.title}
               onChange={handleTitleChange}
             />
@@ -99,6 +144,7 @@ export function NoteEditorPane({
             <NicenoteEditor
               value={currentNote.content ?? undefined}
               onChange={handleContentChange}
+              labels={editorLabels}
             />
           </div>
         </>
@@ -107,15 +153,15 @@ export function NoteEditorPane({
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
             <FileText className="h-8 w-8 opacity-20" />
           </div>
-          <p className="text-lg font-medium">Select a note to view or edit</p>
-          <p className="text-sm opacity-70">Choose from the sidebar or create a new one</p>
+          <p className="text-lg font-medium">{t('editor.selectNote')}</p>
+          <p className="text-sm opacity-70">{t('editor.selectNoteHint')}</p>
           <button
             onClick={() => void createNote()}
-            aria-label="Create new note"
+            aria-label={t('editor.createNewNoteLabel')}
             className="mt-6 flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90"
           >
             <Plus className={WEB_ICON_SM_CLASS} />
-            Create New Note
+            {t('editor.createNewNote')}
           </button>
         </div>
       )}

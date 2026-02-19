@@ -5,14 +5,14 @@ import { Typography } from '@tiptap/extension-typography'
 import { Markdown } from '@tiptap/markdown'
 import { StarterKit } from '@tiptap/starter-kit'
 
-import { NOTE_BEHAVIOR_POLICY } from './behavior-policy'
+import { DEFAULT_EDITOR_LABELS } from '../core/labels'
 
 interface MinimalExtensionOptions {
   placeholder?: string
 }
 
 export function createMinimalExtensions(options: MinimalExtensionOptions = {}): AnyExtension[] {
-  const placeholder = options.placeholder ?? NOTE_BEHAVIOR_POLICY.placeholder
+  const placeholder = options.placeholder ?? DEFAULT_EDITOR_LABELS.content.editorPlaceholder
 
   return [
     StarterKit.configure({

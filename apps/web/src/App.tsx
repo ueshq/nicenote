@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { NotesSidebar } from './components/NotesSidebar'
 import { Toasts } from './components/Toasts'
@@ -11,6 +12,7 @@ const NoteEditorPane = lazy(() =>
 )
 
 export default function App() {
+  const { t } = useTranslation()
   const fetchNotes = useNoteStore((state) => state.fetchNotes)
   const saveNote = useNoteStore((state) => state.saveNote)
   const { scheduleSave, cancelPendingSave, saveStatus } = useDebouncedNoteSave({ saveNote })
@@ -45,7 +47,7 @@ export default function App() {
       <Suspense
         fallback={
           <div className="flex flex-1 items-center justify-center text-muted-foreground">
-            Loading editor...
+            {t('editor.loadingEditor')}
           </div>
         }
       >

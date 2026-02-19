@@ -1,4 +1,5 @@
 import { memo, useCallback, useDeferredValue, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { formatDistanceToNow } from 'date-fns'
 import { ArrowRightFromLine, FileText, Plus, Search, Trash2 } from 'lucide-react'
@@ -8,10 +9,11 @@ import type { NoteListItem as NoteListItemType } from '@nicenote/shared'
 
 import { useMinuteTicker } from '../hooks/useMinuteTicker'
 import { WEB_ICON_MD_CLASS, WEB_ICON_SM_CLASS, WEB_ROW_WITH_ICON_CLASS } from '../lib/class-names'
+import { getDateLocale } from '../lib/date-locale'
 import { useNoteStore } from '../store/useNoteStore'
 import { useToastStore } from '../store/useToastStore'
 
-import { ThemeToggle } from './ThemeToggle'
+import { SettingsDropdown } from './SettingsDropdown'
 
 interface NotesSidebarProps {
   isSidebarOpen: boolean
@@ -29,6 +31,9 @@ interface NoteListItemProps {
   isActive: boolean
   onSelect: (note: NoteListItemType) => void
   onDelete: (id: string) => void
+  untitledLabel: string
+  deleteLabel: string
+  dateLocale: Locale
 }
 
 const NoteListItem = memo(function NoteListItem({
@@ -36,6 +41,9 @@ const NoteListItem = memo(function NoteListItem({
   isActive,
   onSelect,
   onDelete,
+  untitledLabel,
+  deleteLabel,
+  dateLocale,
 }: NoteListItemProps) {
   return (
     <li
@@ -54,18 +62,21 @@ const NoteListItem = memo(function NoteListItem({
           <div className={`${WEB_ROW_WITH_ICON_CLASS} overflow-hidden`}>
             <FileText className={`${WEB_ICON_SM_CLASS} shrink-0 opacity-50`} />
             <span className="truncate font-medium text-muted-foreground">
-              {note.title || 'Untitled'}
+              {note.title || untitledLabel}
             </span>
           </div>
         </div>
         <div className="mt-1 flex items-center justify-between">
           <span className="text-caption whitespace-nowrap opacity-50">
-            {formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true })}
+            {formatDistanceToNow(new Date(note.updatedAt), {
+              addSuffix: true,
+              locale: dateLocale,
+            })}
           </span>
         </div>
       </button>
       <button
-        aria-label={`Delete note: ${note.title || 'Untitled'}`}
+        aria-label={deleteLabel.replace('{{title}}', note.title || untitledLabel)}
         onClick={() => onDelete(note.id)}
         className={`absolute top-3 right-3 shrink-0 rounded-md p-1.5 transition-all hover:bg-destructive/10 hover:text-destructive focus-visible:ring-2 focus-visible:ring-primary/50 ${
           isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
@@ -87,6 +98,7 @@ export function NotesSidebar({
   startResizing,
   cancelPendingSave,
 }: NotesSidebarProps) {
+  const { t, i18n } = useTranslation()
   useMinuteTicker()
   const [search, setSearch] = useState('')
   const deferredSearch = useDeferredValue(search)
@@ -113,6 +125,10 @@ export function NotesSidebar({
   )
   const addToast = useToastStore((state) => state.addToast)
 
+  const dateLocale = useMemo(() => getDateLocale(i18n.language), [i18n.language])
+  const untitledLabel = t('sidebar.untitled')
+  const deleteLabel = t('sidebar.deleteNote', { title: '{{title}}' })
+
   const pendingDeleteTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
 
   const handleDeleteWithUndo = useCallback(
@@ -136,10 +152,10 @@ export function NotesSidebar({
 
       pendingDeleteTimers.current.set(id, deleteTimer)
 
-      addToast('Note deleted', {
+      addToast(t('sidebar.noteDeleted'), {
         duration: 5000,
         action: {
-          label: 'Undo',
+          label: t('sidebar.undo'),
           onClick: () => {
             const timer = pendingDeleteTimers.current.get(id)
             if (timer) {
@@ -154,7 +170,7 @@ export function NotesSidebar({
         },
       })
     },
-    [cancelPendingSave, notes, deleteNote, addToast]
+    [cancelPendingSave, notes, deleteNote, addToast, t]
   )
 
   // #25: Stabilize sort — only re-sort when updatedAt ordering actually changes
@@ -184,7 +200,7 @@ export function NotesSidebar({
       {!isSidebarOpen && (
         <button
           onClick={openSidebar}
-          aria-label="Open sidebar"
+          aria-label={t('sidebar.openSidebar')}
           className="fixed top-4 left-4 z-50 rounded-md bg-background p-2 shadow-sm transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary/50"
         >
           <ArrowRightFromLine className={WEB_ICON_MD_CLASS} />
@@ -202,7 +218,7 @@ export function NotesSidebar({
             <div className={WEB_ROW_WITH_ICON_CLASS}>
               <button
                 onClick={toggleSidebar}
-                aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+                aria-label={isSidebarOpen ? t('sidebar.closeSidebar') : t('sidebar.openSidebar')}
                 className="rounded-md p-1.5 transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary/50"
               >
                 <ArrowRightFromLine
@@ -212,11 +228,11 @@ export function NotesSidebar({
               <h1 className="text-xl font-semibold">Nicenote</h1>
             </div>
             <div className={WEB_ROW_WITH_ICON_CLASS}>
-              <ThemeToggle />
+              <SettingsDropdown />
               <button
                 onClick={() => void createNote()}
                 disabled={isCreating}
-                aria-label="New note"
+                aria-label={t('sidebar.newNote')}
                 className="rounded-md bg-primary p-2 text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
               >
                 <Plus className={WEB_ICON_SM_CLASS} />
@@ -229,8 +245,8 @@ export function NotesSidebar({
             />
             <input
               type="search"
-              placeholder="Search notes..."
-              aria-label="Search notes"
+              placeholder={t('sidebar.searchNotes')}
+              aria-label={t('sidebar.searchNotesLabel')}
               className="w-full py-2 pr-4 pl-9 text-sm"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -256,6 +272,9 @@ export function NotesSidebar({
                   isActive={currentNoteId === note.id}
                   onSelect={selectNote}
                   onDelete={handleDeleteWithUndo}
+                  untitledLabel={untitledLabel}
+                  deleteLabel={deleteLabel}
+                  dateLocale={dateLocale}
                 />
               ))}
           {!isFetching && error && notes.length === 0 && (
@@ -265,7 +284,7 @@ export function NotesSidebar({
           )}
           {!isFetching && !error && filteredNotes.length === 0 && (
             <li className="py-12 text-center text-muted-foreground">
-              <p className="text-sm">No notes found</p>
+              <p className="text-sm">{t('sidebar.noNotesFound')}</p>
             </li>
           )}
         </ul>

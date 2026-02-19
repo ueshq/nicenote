@@ -1,6 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
+import './i18n'
+
 import { ErrorBoundary } from './components/ErrorBoundary'
 import App from './App'
 

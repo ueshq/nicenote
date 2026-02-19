@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-storage-key" content="nicenote-theme" />
 
-    <!-- Theme initialization script - runs before page renders to prevent flash -->
+    <!-- Theme & language initialization script - runs before page renders to prevent flash -->
     <script>
       ;(function () {
-        const root = document.documentElement
-        const storageKey = document
+        var root = document.documentElement
+        var storageKey = document
           .querySelector('meta[name="theme-storage-key"]')
           ?.getAttribute('content')
 
@@ -18,13 +18,23 @@
           root.setAttribute('data-theme-storage-key', storageKey)
         }
 
-        const savedTheme = storageKey ? localStorage.getItem(storageKey) : null
+        var savedTheme = storageKey ? localStorage.getItem(storageKey) : null
 
         // Default to light mode if no saved preference
-        const theme = savedTheme === 'dark' ? 'dark' : 'light'
+        var theme = savedTheme === 'dark' ? 'dark' : 'light'
 
         root.classList.toggle('dark', theme === 'dark')
         root.setAttribute('data-theme', theme)
+
+        // Language detection
+        var savedLang = localStorage.getItem('nicenote-lang')
+        var lang =
+          savedLang === 'zh' || savedLang === 'en'
+            ? savedLang
+            : (navigator.language || '').startsWith('zh')
+              ? 'zh'
+              : 'en'
+        root.lang = lang
       })()
     </script>
 

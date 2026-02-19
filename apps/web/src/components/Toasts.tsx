@@ -1,9 +1,12 @@
+import { useTranslation } from 'react-i18next'
+
 import { X } from 'lucide-react'
 import { useShallow } from 'zustand/react/shallow'
 
 import { useToastStore } from '../store/useToastStore'
 
 export function Toasts() {
+  const { t } = useTranslation()
   const { toasts, removeToast } = useToastStore(
     useShallow((state) => ({
       toasts: state.toasts,
@@ -40,7 +43,7 @@ export function Toasts() {
             <button
               onClick={() => removeToast(toast.id)}
               className="shrink-0 rounded p-0.5 opacity-70 transition-opacity hover:opacity-100"
-              aria-label="Dismiss"
+              aria-label={t('toast.dismiss')}
               aria-describedby={messageId}
             >
               <X className="h-3.5 w-3.5" />
