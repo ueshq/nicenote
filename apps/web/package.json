@@ -4,8 +4,6 @@
   "dependencies": {
     "@nicenote/editor": "workspace:*",
     "@nicenote/shared": "workspace:*",
-    "@nicenote/tokens": "workspace:*",
-    "@radix-ui/react-alert-dialog": "^1.1.15",
     "api": "workspace:*",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.563.0",
@@ -14,15 +12,16 @@
     "zustand": "^5.0.10"
   },
   "devDependencies": {
+    "@nicenote/tokens": "workspace:*",
     "@tailwindcss/typography": "^0.5.19",
-    "@tailwindcss/vite": "^4.1.18",
+    "@tailwindcss/vite": "^4.2.0",
     "@types/node": "^20.19.0",
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
     "eslint": "^9.39.2",
     "hono": "^4.11.9",
-    "tailwindcss": "^4.1.18",
+    "tailwindcss": "^4.2.0",
     "typescript": "~5.9.3",
     "vite": "^7.2.4"
   },

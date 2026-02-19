@@ -51,6 +51,11 @@ pnpm-debug.log*
 .tailwindcss-cache/
 
 ############################
+# Generated files
+############################
+apps/web/src/generated-tokens.css
+
+############################
 # Test / Coverage
 ############################
 coverage/

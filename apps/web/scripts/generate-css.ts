@@ -12,17 +12,14 @@ import {
   darkShadowWeb,
   duration,
   easing,
+  FONT_MONO_STACK,
+  FONT_SANS_STACK,
   fontSize,
   fontWeight,
   shadowWeb,
   spacing,
+  zIndex,
 } from '@nicenote/tokens'
-
-const FONT_SANS_STACK =
-  "'DM Sans', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Helvetica Neue', Arial, sans-serif"
-
-const FONT_MONO_STACK =
-  "'JetBrainsMono', 'SFMono-Regular', 'SF Mono', 'Cascadia Mono', 'Segoe UI Mono', 'Roboto Mono', 'Noto Sans Mono CJK SC', 'Source Han Mono SC', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace"
 
 type Palette = Record<keyof typeof colors, string>
 type VarEntry = [name: string, value: string]
@@ -249,6 +246,12 @@ function buildBaseSections(): VarSection[] {
         ),
       ],
     },
+    {
+      title: 'Z-Index',
+      entries: typedEntries(zIndex).map(
+        ([key, value]): VarEntry => [`z-index-${toKebabCase(key)}`, String(value)]
+      ),
+    },
   ]
 }
 
@@ -300,44 +303,22 @@ function buildThemeBlock(
 
 const themeCSS = buildThemeBlock('@theme', colors, {
   includeBase: true,
-  comment: 'Auto-generated from @nicenote/tokens',
+  comment: 'Auto-generated from @nicenote/tokens — do not edit manually',
 })
 const darkThemeCSS = buildThemeBlock('.dark', darkColors, { includeDarkShadows: true })
 
-const indexCssContent = `@import 'tailwindcss';
-@plugin "@tailwindcss/typography";
-@source "../../packages";
-@config "../tailwind.config.ts";
-
-/* Nicenote Editor Required Styles */
-@import '@nicenote/editor/styles/editor.css';
+const generatedTokensContent = `/* Auto-generated from @nicenote/tokens — do not edit manually */
 
 ${themeCSS}
 
 /* Dark mode */
 ${darkThemeCSS}
-
-@layer base {
-  input,
-  textarea,
-  select {
-    @apply border border-border rounded-md;
-  }
-
-  input:focus,
-  textarea:focus,
-  select:focus,
-  button:focus {
-    @apply focus:ring-1 focus:ring-ring focus:outline-none;
-  }
-
-  body {
-    font-family: var(--font-sans);
-    @apply bg-background text-foreground;
-  }
-}
 `
 
-writeFileSync(new URL('../src/index.css', import.meta.url), indexCssContent, 'utf-8')
+writeFileSync(
+  new URL('../src/generated-tokens.css', import.meta.url),
+  generatedTokensContent,
+  'utf-8'
+)
 
-console.log('✅ Theme CSS generated successfully in index.css')
+console.log('✅ Theme CSS generated successfully in generated-tokens.css')

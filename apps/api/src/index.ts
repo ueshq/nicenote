@@ -24,12 +24,18 @@ app.use(
     origin: (origin) => (ALLOWED_ORIGINS.includes(origin) ? origin : null),
     allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
-    exposeHeaders: ['Content-Length'],
+    exposeHeaders: [
+      'Content-Length',
+      'X-RateLimit-Limit',
+      'X-RateLimit-Remaining',
+      'X-RateLimit-Reset',
+    ],
     maxAge: 600,
   })
 )
 
-// Per-isolate sliding window rate limiter
+// Per-isolate sliding window rate limiter — not globally consistent across
+// Cloudflare Workers isolates, but sufficient as a per-instance safeguard.
 const RATE_LIMIT_WINDOW_MS = 60_000
 const RATE_LIMIT_MAX = 60
 
@@ -49,12 +55,23 @@ app.use('*', async (c, next) => {
     rateLimitMap.set(ip, timestamps)
   }
 
+  const remaining = Math.max(0, RATE_LIMIT_MAX - timestamps.length)
+  const resetTime = Math.ceil((windowStart + RATE_LIMIT_WINDOW_MS) / 1000)
+
+  const setRateLimitHeaders = () => {
+    c.header('X-RateLimit-Limit', RATE_LIMIT_MAX.toString())
+    c.header('X-RateLimit-Remaining', remaining.toString())
+    c.header('X-RateLimit-Reset', resetTime.toString())
+  }
+
   if (timestamps.length >= RATE_LIMIT_MAX) {
+    setRateLimitHeaders()
     return c.json({ error: 'Too Many Requests' }, 429)
   }
 
   timestamps.push(now)
   await next()
+  setRateLimitHeaders()
 })
 
 // 全局错误处理

@@ -53,6 +53,7 @@ describe('useNoteStore', () => {
             },
           ],
           nextCursor: null,
+          nextCursorId: null,
         }),
         { status: 200, headers: { 'content-type': 'application/json' } }
       )

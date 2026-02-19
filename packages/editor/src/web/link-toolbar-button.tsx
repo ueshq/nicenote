@@ -77,7 +77,7 @@ export function LinkToolbarButton({
           {getLinkIcon(false)}
         </Button>
       </PopoverTrigger>
-      <PopoverContent sideOffset={8} align="start" className="z-70 w-80 space-y-3 p-3">
+      <PopoverContent sideOffset={8} align="start" className="z-popover w-80 space-y-3 p-3">
         <form
           className="space-y-2"
           onSubmit={(event) => {

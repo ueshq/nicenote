@@ -22,8 +22,8 @@ export function registerNoteRoutes<E extends Env, S extends Schema, BasePath ext
     .get('/notes', zValidator('query', noteListQuerySchema), async (c) => {
       const service = createService(c.env as E['Bindings'])
       const query = c.req.valid('query')
-      const { data, nextCursor } = await service.list(query)
-      return c.json({ data: noteListItemSchema.array().parse(data), nextCursor })
+      const { data, nextCursor, nextCursorId } = await service.list(query)
+      return c.json({ data: noteListItemSchema.array().parse(data), nextCursor, nextCursorId })
     })
     .get('/notes/:id', zValidator('param', noteIdParamSchema), async (c) => {
       const service = createService(c.env as E['Bindings'])
@@ -66,7 +66,7 @@ function _createContractAppForType() {
   const app = new Hono()
 
   return registerNoteRoutes(app, () => ({
-    list: () => ({ data: [], nextCursor: null }),
+    list: () => ({ data: [], nextCursor: null, nextCursorId: null }),
     getById: () => null,
     create: () => ({
       id: '',

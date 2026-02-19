@@ -11,7 +11,10 @@ vi.mock('drizzle-orm/d1', () => ({
 }))
 
 vi.mock('drizzle-orm/sql/expressions/conditions', () => ({
+  and: vi.fn((...args: unknown[]) => ({ op: 'and', args })),
   eq: eqMock,
+  lt: vi.fn((left: unknown, right: unknown) => ({ op: 'lt', left, right })),
+  or: vi.fn((...args: unknown[]) => ({ op: 'or', args })),
 }))
 
 vi.mock('drizzle-orm/sql/expressions/select', () => ({
@@ -88,7 +91,7 @@ describe('createNoteService', () => {
 
     expect(descMock).toHaveBeenCalledWith(notes.updatedAt)
     expect(selectQuery.orderBy).toHaveBeenCalled()
-    expect(result).toEqual({ data: [{ id: 'n1' }], nextCursor: null })
+    expect(result).toEqual({ data: [{ id: 'n1' }], nextCursor: null, nextCursorId: null })
   })
 
   it('gets note by id and maps missing to null', async () => {

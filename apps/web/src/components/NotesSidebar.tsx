@@ -38,7 +38,8 @@ const NoteListItem = memo(function NoteListItem({
   onDelete,
 }: NoteListItemProps) {
   return (
-    <div
+    <li
+      role="listitem"
       className={`group relative flex flex-col rounded-md p-3 transition-all ${
         isActive
           ? 'bg-accent shadow-sm'
@@ -64,7 +65,7 @@ const NoteListItem = memo(function NoteListItem({
         </div>
       </button>
       <button
-        aria-label="Delete note"
+        aria-label={`Delete note: ${note.title || 'Untitled'}`}
         onClick={() => onDelete(note.id)}
         className={`absolute top-3 right-3 shrink-0 rounded-md p-1.5 transition-all hover:bg-destructive/10 hover:text-destructive focus-visible:ring-2 focus-visible:ring-primary/50 ${
           isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
@@ -72,7 +73,7 @@ const NoteListItem = memo(function NoteListItem({
       >
         <Trash2 className={WEB_ICON_SM_CLASS} />
       </button>
-    </div>
+    </li>
   )
 })
 
@@ -237,16 +238,16 @@ export function NotesSidebar({
           </div>
         </div>
 
-        <div className="flex-1 space-y-1 overflow-y-auto p-2">
+        <ul role="list" className="flex-1 space-y-1 overflow-y-auto p-2">
           {isFetching && notes.length === 0
             ? Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="animate-pulse space-y-2 rounded-md p-3">
+                <li key={i} className="animate-pulse space-y-2 rounded-md p-3">
                   <div className={WEB_ROW_WITH_ICON_CLASS}>
                     <div className={`${WEB_ICON_SM_CLASS} rounded bg-muted`} />
                     <div className="h-4 w-2/3 rounded bg-muted" />
                   </div>
                   <div className="ml-6 h-3 w-1/2 rounded bg-muted" />
-                </div>
+                </li>
               ))
             : filteredNotes.map((note) => (
                 <NoteListItem
@@ -258,16 +259,16 @@ export function NotesSidebar({
                 />
               ))}
           {!isFetching && error && notes.length === 0 && (
-            <div className="py-12 text-center text-destructive">
+            <li className="py-12 text-center text-destructive">
               <p className="text-sm">{error}</p>
-            </div>
+            </li>
           )}
           {!isFetching && !error && filteredNotes.length === 0 && (
-            <div className="py-12 text-center text-muted-foreground">
+            <li className="py-12 text-center text-muted-foreground">
               <p className="text-sm">No notes found</p>
-            </div>
+            </li>
           )}
-        </div>
+        </ul>
         {!isMobile && (
           <div
             className={`absolute top-0 right-0 z-50 h-full cursor-col-resize bg-border transition-all duration-100 hover:bg-primary ${

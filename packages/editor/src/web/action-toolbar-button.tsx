@@ -3,7 +3,6 @@ import type { ReactNode } from 'react'
 import { Button } from '@nicenote/ui'
 
 export function ActionToolbarButton({
-  id,
   label,
   shortcut,
   isMobile,
@@ -12,7 +11,6 @@ export function ActionToolbarButton({
   onClick,
   icon,
 }: {
-  id: string
   label: string
   shortcut?: string
   isMobile: boolean
@@ -23,7 +21,6 @@ export function ActionToolbarButton({
 }) {
   return (
     <Button
-      key={id}
       type="button"
       onClick={onClick}
       aria-label={label}

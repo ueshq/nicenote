@@ -2,6 +2,12 @@
  * Design Tokens — Typography
  */
 
+export const FONT_SANS_STACK =
+  "'DM Sans', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Helvetica Neue', Arial, sans-serif"
+
+export const FONT_MONO_STACK =
+  "'JetBrainsMono', 'SFMono-Regular', 'SF Mono', 'Cascadia Mono', 'Segoe UI Mono', 'Roboto Mono', 'Noto Sans Mono CJK SC', 'Source Han Mono SC', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace"
+
 export const fontSize = {
   caption: { size: 10, lineHeight: 14 },
   meta: { size: 11, lineHeight: 16 },

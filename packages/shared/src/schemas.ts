@@ -50,6 +50,7 @@ export const noteIdParamSchema = z
 
 export const noteListQuerySchema = z.object({
   cursor: z.string().datetime({ offset: true }).optional(),
+  cursorId: z.string().min(1).optional(),
   limit: z.coerce.number().int().min(1).max(100).optional().default(50),
 })
 
@@ -63,6 +64,7 @@ export type NoteListQuery = z.infer<typeof noteListQuerySchema>
 export interface NoteListResult {
   data: NoteListItem[]
   nextCursor: string | null
+  nextCursorId: string | null
 }
 
 export interface NoteContractService {

@@ -58,7 +58,7 @@ export function CommandDropdownMenu({
           <ChevronDown className="nn-editor-toolbar-icon opacity-70" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent portal sideOffset={6} className="z-70 p-1">
+      <DropdownMenuContent portal sideOffset={6} className="z-dropdown p-1">
         {options.map((option) => {
           const resolvedOption = resolveOption(option)
           if (!resolvedOption) {

@@ -27,7 +27,6 @@ export type {
 export {
   noteCreateSchema,
   noteIdParamSchema,
-  noteInsertSchema,
   noteListItemSchema,
   noteListQuerySchema,
   noteSelectSchema,

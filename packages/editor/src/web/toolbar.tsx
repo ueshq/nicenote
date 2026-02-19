@@ -292,7 +292,7 @@ export function MinimalToolbar({
 
                   return (
                     <ActionToolbarButton
-                      id={item.id}
+                      key={item.id}
                       label={item.label}
                       isMobile={isMobile}
                       active={active}

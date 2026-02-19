@@ -1,5 +1,5 @@
 import { drizzle } from 'drizzle-orm/d1'
-import { eq, lt } from 'drizzle-orm/sql/expressions/conditions'
+import { and, eq, lt, or } from 'drizzle-orm/sql/expressions/conditions'
 import { desc } from 'drizzle-orm/sql/expressions/select'
 
 import { type NoteContractService, type NoteInsert, type NoteSelect } from '@nicenote/shared'
@@ -28,8 +28,16 @@ export function createNoteService(bindings: NoteServiceBindings): NoteContractSe
   const db = drizzle(bindings.DB)
 
   return {
-    list: async ({ cursor, limit }) => {
-      const where = cursor ? lt(notes.updatedAt, cursor) : undefined
+    list: async ({ cursor, cursorId, limit }) => {
+      const where =
+        cursor && cursorId
+          ? or(
+              lt(notes.updatedAt, cursor),
+              and(eq(notes.updatedAt, cursor), lt(notes.id, cursorId))
+            )
+          : cursor
+            ? lt(notes.updatedAt, cursor)
+            : undefined
       const rows = await db
         .select({
           id: notes.id,
@@ -39,13 +47,15 @@ export function createNoteService(bindings: NoteServiceBindings): NoteContractSe
         })
         .from(notes)
         .where(where)
-        .orderBy(desc(notes.updatedAt))
+        .orderBy(desc(notes.updatedAt), desc(notes.id))
         .limit(limit + 1)
         .all()
       const hasMore = rows.length > limit
       const data = hasMore ? rows.slice(0, limit) : rows
-      const nextCursor = hasMore ? data[data.length - 1].updatedAt : null
-      return { data, nextCursor }
+      const last = data[data.length - 1]
+      const nextCursor = hasMore && last ? last.updatedAt : null
+      const nextCursorId = hasMore && last ? last.id : null
+      return { data, nextCursor, nextCursorId }
     },
     getById: async (id) => {
       const result = await db.select().from(notes).where(eq(notes.id, id)).get()
