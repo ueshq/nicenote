@@ -51,6 +51,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Generate CSS tokens
+        run: pnpm generate:css
+
       - name: Lint
         run: pnpm lint
 
