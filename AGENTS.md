@@ -154,3 +154,14 @@ Types/Schemas: NoteSelect, NoteInsert, NoteCreateInput, NoteUpdateInput, NoteLis
 - **API**: Cloudflare Workers (wrangler), D1 database binding "DB"
 - **Web**: Cloudflare Pages
 - **CI/CD**: GitHub Actions (ci-cd.yml)
+
+## Implementation Principles
+
+- Converge directly: choose the shortest workable path.
+- No unnecessary compatibility layers.
+- Remove redundant/obsolete code proactively.
+- Optimize readability, testability, and maintainability.
+
+## 注释规范
+
+代码中的注释使用中文。

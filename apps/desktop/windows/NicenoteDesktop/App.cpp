@@ -20,19 +20,15 @@ namespace winrt::NicenoteDesktop::implementation
 /// </summary>
 App::App() noexcept
 {
-#if BUNDLE
+    // 始终使用预打包 bundle，不连接 Metro 开发服务器
     JavaScriptBundleFile(L"index.windows");
     InstanceSettings().UseFastRefresh(false);
-#else
-    JavaScriptBundleFile(L"index");
-    InstanceSettings().UseFastRefresh(true);
-#endif
+    InstanceSettings().UseDirectDebugger(false);
 
 #if _DEBUG
-    InstanceSettings().UseDirectDebugger(true);
+    // Debug 模式下保留错误提示界面，方便排查 JS 运行时错误
     InstanceSettings().UseDeveloperSupport(true);
 #else
-    InstanceSettings().UseDirectDebugger(false);
     InstanceSettings().UseDeveloperSupport(false);
 #endif
 

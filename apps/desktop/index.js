@@ -2,4 +2,4 @@ import { AppRegistry } from 'react-native'
 
 import App from './App'
 
-AppRegistry.registerComponent('NiceNoteDesktop', () => App)
+AppRegistry.registerComponent('NicenoteDesktop', () => App)

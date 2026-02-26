@@ -15,7 +15,7 @@ export default defineConfig({
     // Inline all assets so the result is a single self-contained HTML
     assetsInlineLimit: Infinity,
     rollupOptions: {
-      input: resolve(__dirname, 'template/index.html'),
+      input: resolve(__dirname, 'template/editor.html'),
       output: {
         entryFileNames: '[name].js',
         chunkFileNames: '[name].js',
