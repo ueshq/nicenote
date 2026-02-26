@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
-import { Check, Languages, Moon, Settings, Sun } from 'lucide-react'
+import { Check, Download, Keyboard, Languages, Moon, Settings, Sun, Upload } from 'lucide-react'
 import { useShallow } from 'zustand/react/shallow'
 
 import {
@@ -14,7 +14,17 @@ import { WEB_ICON_BUTTON_CLASS, WEB_ICON_MD_CLASS, WEB_ICON_SM_CLASS } from '../
 import { useLanguageStore } from '../store/useLanguageStore'
 import { useThemeStore } from '../store/useThemeStore'
 
-export function SettingsDropdown() {
+interface SettingsDropdownProps {
+  onShowShortcuts?: () => void
+  onExportAll?: () => void
+  onImport?: () => void
+}
+
+export function SettingsDropdown({
+  onShowShortcuts,
+  onExportAll,
+  onImport,
+}: SettingsDropdownProps) {
   const { t } = useTranslation()
 
   const { theme, toggle: toggleTheme } = useThemeStore(
@@ -87,6 +97,36 @@ export function SettingsDropdown() {
           <span className="flex-1 text-left">{t('settings.chinese')}</span>
           {language === 'zh' && <Check className={WEB_ICON_SM_CLASS} />}
         </DropdownMenuItem>
+
+        <div className="my-1 h-px bg-border" />
+
+        {onImport && (
+          <DropdownMenuItem
+            className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm"
+            onSelect={onImport}
+          >
+            <Upload className={WEB_ICON_SM_CLASS} />
+            <span className="flex-1 text-left">{t('import.title')}</span>
+          </DropdownMenuItem>
+        )}
+        {onExportAll && (
+          <DropdownMenuItem
+            className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm"
+            onSelect={onExportAll}
+          >
+            <Download className={WEB_ICON_SM_CLASS} />
+            <span className="flex-1 text-left">{t('export.exportAll')}</span>
+          </DropdownMenuItem>
+        )}
+        {onShowShortcuts && (
+          <DropdownMenuItem
+            className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm"
+            onSelect={onShowShortcuts}
+          >
+            <Keyboard className={WEB_ICON_SM_CLASS} />
+            <span className="flex-1 text-left">{t('shortcuts.title')}</span>
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )

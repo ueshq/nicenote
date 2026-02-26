@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import { useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow } from 'date-fns'
-import { FileText, Plus } from 'lucide-react'
+import { Download, FileText, Plus } from 'lucide-react'
 
 import type { EditorLabels } from '@nicenote/editor'
 import { NicenoteEditor } from '@nicenote/editor'
@@ -13,9 +13,13 @@ import type { SaveStatus } from '../hooks/useDebouncedNoteSave'
 import { useMinuteTicker } from '../hooks/useMinuteTicker'
 import { useNoteDetail } from '../hooks/useNoteDetail'
 import { updateNoteLocal, useCreateNote } from '../hooks/useNoteMutations'
+import { useNoteTagsQuery } from '../hooks/useNoteTagsQuery'
 import { WEB_ICON_SM_CLASS } from '../lib/class-names'
 import { getDateLocale } from '../lib/date-locale'
+import { downloadBlob, exportNoteAsMarkdown } from '../lib/export'
 import { useNoteStore } from '../store/useNoteStore'
+
+import { TagInput } from './TagInput'
 
 interface NoteEditorPaneProps {
   scheduleSave: (id: string, updates: NoteUpdateInput) => void
@@ -30,6 +34,7 @@ export function NoteEditorPane({ scheduleSave, saveStatus, inert, isMobile }: No
   const queryClient = useQueryClient()
   const selectedNoteId = useNoteStore((s) => s.selectedNoteId)
   const { data: currentNote } = useNoteDetail(selectedNoteId)
+  const { data: noteTags = [] } = useNoteTagsQuery(selectedNoteId)
   const createMutation = useCreateNote()
 
   const saveStatusLabel: Record<SaveStatus, string | null> = useMemo(
@@ -124,6 +129,21 @@ export function NoteEditorPane({ scheduleSave, saveStatus, inert, isMobile }: No
               {saveStatusLabel[saveStatus] && (
                 <span className="text-muted-foreground/70">{saveStatusLabel[saveStatus]}</span>
               )}
+              <button
+                onClick={() => {
+                  const blob = exportNoteAsMarkdown(currentNote)
+                  const filename = `${currentNote.title || 'Untitled'}.md`
+                  downloadBlob(blob, filename)
+                }}
+                aria-label={t('export.exportNote')}
+                className="ml-auto rounded p-1 text-muted-foreground/50 transition-colors hover:text-foreground"
+                title={t('export.exportNote')}
+              >
+                <Download className={WEB_ICON_SM_CLASS} />
+              </button>
+            </div>
+            <div className="mt-3">
+              <TagInput noteId={currentNote.id} noteTags={noteTags} />
             </div>
           </div>
           <div className="flex-1 overflow-hidden px-8 pb-8">
@@ -144,7 +164,7 @@ export function NoteEditorPane({ scheduleSave, saveStatus, inert, isMobile }: No
           <p className="text-lg font-medium">{t('editor.selectNote')}</p>
           <p className="text-sm opacity-70">{t('editor.selectNoteHint')}</p>
           <button
-            onClick={() => createMutation.mutate()}
+            onClick={() => createMutation.mutate(undefined)}
             disabled={createMutation.isPending}
             aria-label={t('editor.createNewNoteLabel')}
             className="mt-6 flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"

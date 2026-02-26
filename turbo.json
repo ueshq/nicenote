@@ -30,6 +30,18 @@
     },
     "cf-typegen": {
       "cache": false
+    },
+    "nicenote-mobile#start": {
+      "cache": false,
+      "persistent": true
+    },
+    "nicenote-mobile#ios": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "nicenote-mobile#android": {
+      "dependsOn": ["^build"],
+      "cache": false
     }
   }
 }

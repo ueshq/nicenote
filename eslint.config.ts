@@ -32,6 +32,8 @@ export default tseslint.config(
       '**/drizzle/**',
       '**/.wrangler/**',
       '**/*.d.ts',
+      'apps/mobile/*.js',
+      'apps/mobile/index.js',
     ],
   },
 

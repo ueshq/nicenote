@@ -12,11 +12,13 @@ import {
 
 import i18n from '../i18n'
 import { api, throwApiError } from '../lib/api'
+import { useFolderStore } from '../store/useFolderStore'
 import { useNoteStore } from '../store/useNoteStore'
+import { useTagFilterStore } from '../store/useTagFilterStore'
 import { useToastStore } from '../store/useToastStore'
 
 import { noteDetailQueryKey } from './useNoteDetail'
-import { NOTES_QUERY_KEY } from './useNotesQuery'
+import { NOTES_QUERY_KEY, notesQueryKey } from './useNotesQuery'
 
 // ── Cache types ──
 
@@ -30,25 +32,29 @@ type NotesInfiniteData = InfiniteData<NotesPage>
 
 // ── Cache helpers (exported for useDebouncedNoteSave & NotesSidebar) ──
 
+/** Search all notes query caches (across folder filters) for a note */
 export function getNoteFromListCache(
   queryClient: QueryClient,
   id: string
 ): NoteListItem | undefined {
-  const data = queryClient.getQueryData<NotesInfiniteData>(NOTES_QUERY_KEY)
-  if (!data) return undefined
-  for (const page of data.pages) {
-    const note = page.data.find((n) => n.id === id)
-    if (note) return note
+  const allCaches = queryClient.getQueriesData<NotesInfiniteData>({ queryKey: NOTES_QUERY_KEY })
+  for (const [, data] of allCaches) {
+    if (!data) continue
+    for (const page of data.pages) {
+      const note = page.data.find((n) => n.id === id)
+      if (note) return note
+    }
   }
   return undefined
 }
 
+/** Update a note in all matching notes query caches */
 export function updateNoteInListCache(
   queryClient: QueryClient,
   id: string,
   updater: (note: NoteListItem) => NoteListItem
 ) {
-  queryClient.setQueryData<NotesInfiniteData>(NOTES_QUERY_KEY, (old) => {
+  queryClient.setQueriesData<NotesInfiniteData>({ queryKey: NOTES_QUERY_KEY }, (old) => {
     if (!old) return old
     return {
       ...old,
@@ -60,8 +66,9 @@ export function updateNoteInListCache(
   })
 }
 
+/** Remove a note from all matching notes query caches */
 export function removeNoteFromListCache(queryClient: QueryClient, id: string) {
-  queryClient.setQueryData<NotesInfiniteData>(NOTES_QUERY_KEY, (old) => {
+  queryClient.setQueriesData<NotesInfiniteData>({ queryKey: NOTES_QUERY_KEY }, (old) => {
     if (!old) return old
     return {
       ...old,
@@ -73,16 +80,24 @@ export function removeNoteFromListCache(queryClient: QueryClient, id: string) {
   })
 }
 
+/** Restore a note to the currently active notes query cache */
 export function restoreNoteToListCache(queryClient: QueryClient, note: NoteListItem) {
-  queryClient.setQueryData<NotesInfiniteData>(NOTES_QUERY_KEY, (old) => {
+  const folderId = useFolderStore.getState().selectedFolderId
+  const tagId = useTagFilterStore.getState().selectedTagId
+  const key = notesQueryKey(folderId, tagId)
+  queryClient.setQueryData<NotesInfiniteData>(key, (old) => {
     if (!old || old.pages.length === 0) return old
-    const allNotes = [...old.pages[0].data, note].sort(
+    const firstPage = old.pages[0]
+    if (!firstPage) return old
+    const allNotes = [...firstPage.data, note].sort(
       (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     )
-    return {
-      ...old,
-      pages: [{ ...old.pages[0], data: allNotes }, ...old.pages.slice(1)],
+    const updatedPage: NotesPage = {
+      data: allNotes,
+      nextCursor: firstPage.nextCursor,
+      nextCursorId: firstPage.nextCursorId,
     }
+    return { ...old, pages: [updatedPage, ...old.pages.slice(1)] }
   })
 }
 
@@ -123,13 +138,15 @@ export function useCreateNote() {
   const addToast = useToastStore((s) => s.addToast)
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (folderId?: string | null) => {
+      const json: Record<string, unknown> = { title: DEFAULT_NOTE_TITLE, content: '' }
+      if (folderId) json.folderId = folderId
       const res = await api.notes.$post({
-        json: { title: DEFAULT_NOTE_TITLE, content: '' },
+        json: json as { title?: string; content?: string | null; folderId?: string | null },
       })
       if (!res.ok) await throwApiError(res, `Create failed: ${res.status}`)
-      const json = await res.json()
-      const parsed = noteSelectSchema.safeParse(json)
+      const body = await res.json()
+      const parsed = noteSelectSchema.safeParse(body)
       if (!parsed.success) throw new Error('Invalid note data')
       return parsed.data
     },
@@ -140,18 +157,25 @@ export function useCreateNote() {
         id: newNote.id,
         title: newNote.title,
         summary: generateSummary(newNote.content ?? ''),
+        folderId: newNote.folderId,
         createdAt: newNote.createdAt,
         updatedAt: newNote.updatedAt,
       }
-      queryClient.setQueryData<NotesInfiniteData>(NOTES_QUERY_KEY, (old) => {
+
+      // Add to the currently active list cache
+      const activeFolderId = useFolderStore.getState().selectedFolderId
+      const activeTagId = useTagFilterStore.getState().selectedTagId
+      const key = notesQueryKey(activeFolderId, activeTagId)
+      queryClient.setQueryData<NotesInfiniteData>(key, (old) => {
         if (!old || old.pages.length === 0) return old
-        return {
-          ...old,
-          pages: [
-            { ...old.pages[0], data: [listItem, ...old.pages[0].data] },
-            ...old.pages.slice(1),
-          ],
+        const firstPage = old.pages[0]
+        if (!firstPage) return old
+        const updatedPage: NotesPage = {
+          data: [listItem, ...firstPage.data],
+          nextCursor: firstPage.nextCursor,
+          nextCursorId: firstPage.nextCursorId,
         }
+        return { ...old, pages: [updatedPage, ...old.pages.slice(1)] }
       })
 
       useNoteStore.getState().selectNote(newNote.id)

@@ -12,6 +12,7 @@ export const noteSelectSchema = z
     id: z.string(),
     title: z.string().max(MAX_TITLE_LENGTH),
     content: z.string().max(MAX_CONTENT_LENGTH).nullable(),
+    folderId: z.string().nullable(),
     createdAt: isoDateTimeSchema,
     updatedAt: isoDateTimeSchema,
   })
@@ -31,20 +32,26 @@ export const noteInsertSchema = z
   })
   .strict()
 
-export const noteCreateSchema = noteInsertSchema.pick({
-  title: true,
-  content: true,
-})
+export const noteCreateSchema = z
+  .object({
+    title: z.string().max(MAX_TITLE_LENGTH).optional(),
+    content: z.string().max(MAX_CONTENT_LENGTH).nullable().optional(),
+    folderId: z.string().nullable().optional(),
+  })
+  .strict()
 
 export const noteUpdateSchema = z
   .object({
     title: z.string().max(MAX_TITLE_LENGTH).optional(),
     content: z.string().max(MAX_CONTENT_LENGTH).nullable().optional(),
+    folderId: z.string().nullable().optional(),
   })
   .strict()
-  .refine((input) => input.title !== undefined || input.content !== undefined, {
-    message: 'At least one field must be provided for update',
-  })
+  .refine(
+    (input) =>
+      input.title !== undefined || input.content !== undefined || input.folderId !== undefined,
+    { message: 'At least one field must be provided for update' }
+  )
 
 export const noteIdParamSchema = z
   .object({
@@ -56,6 +63,8 @@ export const noteListQuerySchema = z.object({
   cursor: z.string().datetime({ offset: true }).optional(),
   cursorId: z.string().min(1).optional(),
   limit: z.coerce.number().int().min(1).max(100).optional().default(50),
+  folderId: z.string().min(1).optional(),
+  tagId: z.string().min(1).optional(),
 })
 
 export type NoteSelect = z.infer<typeof noteSelectSchema>
@@ -71,10 +80,24 @@ export interface NoteListResult {
   nextCursorId: string | null
 }
 
+export const noteSearchQuerySchema = z.object({
+  q: z.string().min(1).max(200),
+  limit: z.coerce.number().int().min(1).max(50).optional().default(20),
+})
+
+export type NoteSearchQuery = z.infer<typeof noteSearchQuerySchema>
+
+export const noteSearchResultSchema = noteListItemSchema.extend({
+  snippet: z.string(),
+})
+
+export type NoteSearchResult = z.infer<typeof noteSearchResultSchema>
+
 export interface NoteContractService {
   list: (query: NoteListQuery) => Promise<NoteListResult> | NoteListResult
   getById: (id: string) => Promise<NoteSelect | null> | NoteSelect | null
   create: (input: NoteCreateInput) => Promise<NoteSelect> | NoteSelect
   update: (id: string, input: NoteUpdateInput) => Promise<NoteSelect | null> | NoteSelect | null
   remove: (id: string) => Promise<boolean> | boolean
+  search: (query: NoteSearchQuery) => Promise<NoteSearchResult[]> | NoteSearchResult[]
 }

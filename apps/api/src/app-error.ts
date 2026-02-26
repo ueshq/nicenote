@@ -1,16 +1,17 @@
 import type { Context } from 'hono'
-import type { StatusCode } from 'hono/utils/http-status'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 import type { ApiMessageKey } from './i18n'
 import { resolveLocale, t } from './i18n'
 
 export class AppError extends Error {
-  constructor(
-    public readonly messageKey: ApiMessageKey,
-    public readonly status: StatusCode = 500,
-    cause?: unknown
-  ) {
+  readonly messageKey: ApiMessageKey
+  readonly status: ContentfulStatusCode
+
+  constructor(messageKey: ApiMessageKey, status: ContentfulStatusCode = 500, cause?: unknown) {
     super(messageKey, { cause })
+    this.messageKey = messageKey
+    this.status = status
   }
 }
 

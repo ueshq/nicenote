@@ -25,6 +25,8 @@ export type {
   NoteListItem,
   NoteListQuery,
   NoteListResult,
+  NoteSearchQuery,
+  NoteSearchResult,
   NoteSelect,
   NoteUpdateInput,
 } from './schemas'
@@ -33,6 +35,36 @@ export {
   noteIdParamSchema,
   noteListItemSchema,
   noteListQuerySchema,
+  noteSearchQuerySchema,
+  noteSearchResultSchema,
   noteSelectSchema,
   noteUpdateSchema,
 } from './schemas'
+
+// ============================================================
+// Folder Schema & 类型
+// ============================================================
+export type {
+  FolderContractService,
+  FolderCreateInput,
+  FolderSelect,
+  FolderUpdateInput,
+} from './folder-schemas'
+export {
+  folderCreateSchema,
+  folderIdParamSchema,
+  folderSelectSchema,
+  folderUpdateSchema,
+} from './folder-schemas'
+
+// ============================================================
+// Tag Schema & 类型
+// ============================================================
+export type { TagContractService, TagCreateInput, TagSelect, TagUpdateInput } from './tag-schemas'
+export {
+  noteTagParamSchema,
+  tagCreateSchema,
+  tagIdParamSchema,
+  tagSelectSchema,
+  tagUpdateSchema,
+} from './tag-schemas'

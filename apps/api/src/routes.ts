@@ -8,11 +8,15 @@ import {
   noteIdParamSchema,
   noteListItemSchema,
   noteListQuerySchema,
+  noteSearchQuerySchema,
+  noteSearchResultSchema,
   noteSelectSchema,
   noteUpdateSchema,
 } from '@nicenote/shared'
 
 import { AppError } from './app-error'
+import { registerFolderRoutes } from './folder-routes'
+import { registerTagRoutes } from './tag-routes'
 
 export type NoteContractFactory<E extends Env> = (bindings: E['Bindings']) => NoteContractService
 
@@ -26,6 +30,12 @@ export function registerNoteRoutes<E extends Env, S extends Schema, BasePath ext
       const query = c.req.valid('query')
       const { data, nextCursor, nextCursorId } = await service.list(query)
       return c.json({ data: noteListItemSchema.array().parse(data), nextCursor, nextCursorId })
+    })
+    .get('/notes/search', zValidator('query', noteSearchQuerySchema), async (c) => {
+      const service = createService(c.env as E['Bindings'])
+      const query = c.req.valid('query')
+      const results = await service.search(query)
+      return c.json({ data: noteSearchResultSchema.array().parse(results) })
     })
     .get('/notes/:id', zValidator('param', noteIdParamSchema), async (c) => {
       const service = createService(c.env as E['Bindings'])
@@ -63,21 +73,49 @@ export function registerNoteRoutes<E extends Env, S extends Schema, BasePath ext
 }
 
 function _createContractAppForType() {
-  const app = new Hono()
-
-  return registerNoteRoutes(app, () => ({
+  const noteApp = registerNoteRoutes(new Hono(), () => ({
     list: () => ({ data: [], nextCursor: null, nextCursorId: null }),
     getById: () => null,
     create: () => ({
       id: '',
       title: '',
       content: null,
+      folderId: null,
+      createdAt: '',
+      updatedAt: '',
+    }),
+    update: () => null,
+    remove: () => false,
+    search: () => [],
+  }))
+
+  const folderApp = registerFolderRoutes(new Hono(), () => ({
+    list: () => [],
+    getById: () => null,
+    create: () => ({
+      id: '',
+      name: '',
+      parentId: null,
+      position: 0,
       createdAt: '',
       updatedAt: '',
     }),
     update: () => null,
     remove: () => false,
   }))
+
+  const tagApp = registerTagRoutes(new Hono(), () => ({
+    list: () => [],
+    getById: () => null,
+    create: () => ({ id: '', name: '', color: null, createdAt: '' }),
+    update: () => null,
+    remove: () => false,
+    addTagToNote: () => false,
+    removeTagFromNote: () => false,
+    getTagsForNote: () => [],
+  }))
+
+  return new Hono().route('', noteApp).route('', folderApp).route('', tagApp)
 }
 
 export type AppType = ReturnType<typeof _createContractAppForType>

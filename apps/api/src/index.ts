@@ -2,9 +2,13 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 
+import { createFolderService } from './services/folder-service'
 import { createNoteService, type NoteServiceBindings } from './services/note-service'
+import { createTagService } from './services/tag-service'
 import { handleAppError } from './app-error'
+import { registerFolderRoutes } from './folder-routes'
 import { registerNoteRoutes } from './routes'
+import { registerTagRoutes } from './tag-routes'
 
 const app = new Hono<{ Bindings: NoteServiceBindings }>()
 
@@ -44,6 +48,8 @@ app.get('/', (c) => c.json({ status: 'ok', message: 'Nicenote API is running' })
 app.get('/health', (c) => c.json({ status: 'ok' }))
 
 registerNoteRoutes(app, createNoteService)
+registerFolderRoutes(app, createFolderService)
+registerTagRoutes(app, createTagService)
 
 export type { AppType } from './routes'
 export default app

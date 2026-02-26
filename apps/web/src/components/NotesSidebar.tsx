@@ -20,15 +20,21 @@ import {
 import { useNotesQuery } from '../hooks/useNotesQuery'
 import { WEB_ICON_MD_CLASS, WEB_ICON_SM_CLASS, WEB_ROW_WITH_ICON_CLASS } from '../lib/class-names'
 import { getDateLocale } from '../lib/date-locale'
+import { useFolderStore } from '../store/useFolderStore'
 import { useNoteStore } from '../store/useNoteStore'
 import { useSidebarStore } from '../store/useSidebarStore'
 import { useToastStore } from '../store/useToastStore'
 
+import { FolderTree } from './FolderTree'
 import { SettingsDropdown } from './SettingsDropdown'
+import { TagFilter } from './TagFilter'
 
 interface NotesSidebarProps {
   isMobile: boolean
   cancelPendingSave: (id: string) => void
+  onShowShortcuts?: () => void
+  onExportAll?: () => void
+  onImport?: () => void
 }
 
 interface NoteListItemProps {
@@ -96,7 +102,13 @@ const NoteListItem = memo(function NoteListItem({
   )
 })
 
-export function NotesSidebar({ isMobile, cancelPendingSave }: NotesSidebarProps) {
+export function NotesSidebar({
+  isMobile,
+  cancelPendingSave,
+  onShowShortcuts,
+  onExportAll,
+  onImport,
+}: NotesSidebarProps) {
   const { t, i18n } = useTranslation()
   const [search, setSearch] = useState('')
   const deferredSearch = useDeferredValue(search)
@@ -281,9 +293,13 @@ export function NotesSidebar({ isMobile, cancelPendingSave }: NotesSidebarProps)
             <h1 className="text-xl font-semibold">Nicenote</h1>
           </div>
           <div className={WEB_ROW_WITH_ICON_CLASS}>
-            <SettingsDropdown />
+            <SettingsDropdown
+              {...(onShowShortcuts ? { onShowShortcuts } : {})}
+              {...(onExportAll ? { onExportAll } : {})}
+              {...(onImport ? { onImport } : {})}
+            />
             <button
-              onClick={() => createMutation.mutate()}
+              onClick={() => createMutation.mutate(useFolderStore.getState().selectedFolderId)}
               disabled={isCreating}
               aria-label={t('sidebar.newNote')}
               className="rounded-md bg-primary p-2 text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
@@ -306,6 +322,9 @@ export function NotesSidebar({ isMobile, cancelPendingSave }: NotesSidebarProps)
           />
         </div>
       </div>
+
+      <FolderTree />
+      <TagFilter />
 
       <ul role="list" className="flex-1 space-y-1 overflow-y-auto p-2">
         {isInitialLoading
