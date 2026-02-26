@@ -11,7 +11,7 @@
 
 ### 1.1 产品定位
 
-NiceNote Desktop 是一款基于 **Wails 3 + Go + React** 的跨平台本地 Markdown 笔记应用。所有数据完全存储在用户本地设备上，**不支持任何网络同步功能**，确保用户数据的完全私密性和离线可用性。
+NiceNote Desktop 是一款基于 **React Native** 的跨平台本地 Markdown 笔记应用。所有数据完全存储在用户本地设备上，**不支持任何网络同步功能**，确保用户数据的完全私密性和离线可用性。
 
 ### 1.2 目标用户
 
@@ -27,21 +27,21 @@ NiceNote Desktop 是一款基于 **Wails 3 + Go + React** 的跨平台本地 Mar
 - **纯本地存储** — 零网络依赖，数据永远在你手中
 - **所见即所得 + 源码双模式** — Tiptap v3 富文本编辑器，一键切换 Markdown 源码
 - **跨平台一致体验** — macOS / Windows / Linux 原生窗口，统一设计语言
-- **轻量极速** — Go 后端 + SQLite 本地数据库，毫秒级启动和查询
+- **轻量极速** — 纯本地 JSI SQLite 绑定，毫秒级启动和查询
 - **复用成熟组件** — 基于 NiceNote Web 版已验证的编辑器、UI 组件库和设计系统
 
 ### 1.4 技术选型概要
 
-| 层级     | 技术               | 说明                                |
-| -------- | ------------------ | ----------------------------------- |
-| 桌面框架 | Wails 3            | Go + Web 前端混合架构，原生窗口     |
-| 后端语言 | Go                 | 文件系统操作、SQLite 管理、系统集成 |
-| 前端框架 | React 19           | 复用现有 Web 前端组件               |
-| 数据库   | SQLite (CGo)       | 通过 Go 直接操作，无需网络层        |
-| 编辑器   | Tiptap v3          | 复用 `@nicenote/editor`             |
-| UI 组件  | Radix UI           | 复用 `@nicenote/ui`                 |
-| 设计系统 | Design Tokens      | 复用 `@nicenote/tokens`             |
-| 构建工具 | Vite 7 + Wails CLI | 前端 Vite 构建，Wails 打包          |
+| 层级     | 技术                     | 说明                                     |
+| -------- | ------------------------ | ---------------------------------------- |
+| 桌面框架 | React Native             | 跨平台原生桌面引擎（Mac & Windows）      |
+| 业务框架 | React 19                 | 共享现有 Web 前端组件                    |
+| 数据库   | op-sqlite + Drizzle ORM  | JSI 原生 SQLite 绑定，直接操作无需网络层 |
+| 编辑器   | Tiptap v3                | Web 端打包通过 React Native WebView 嵌入 |
+| UI 组件  | NativeWind v4 + 专属组件 | 使用原生兼容包重构基础 UI                |
+| 状态管理 | Zustand v5 + Immer       | 极简全局状态管理                         |
+| 跨端桥接 | Custom Native Modules    | 系统托盘、全局快捷键等原生功能桥接       |
+| 构建工具 | Metro + React Native CLI | TypeScript 原生构建体系                  |
 
 ---
 
@@ -318,7 +318,7 @@ END;
 - 每个窗口独立编辑区域，共享数据库
 - 同一笔记在多窗口编辑时：最后保存者生效，不做冲突合并
 - 窗口尺寸和位置记忆（下次打开时恢复）
-- 利用 Wails 3 原生多窗口 API
+- 利用 React Native 桌面端相关原生多窗口能力定制
 
 ---
 
@@ -402,11 +402,10 @@ END;
 
 ### 3.4 平台兼容性
 
-| 平台    | 最低版本                               |
-| ------- | -------------------------------------- |
-| macOS   | 11 (Big Sur)                           |
-| Windows | 10 (1809+)                             |
-| Linux   | Ubuntu 20.04 / Fedora 34 / Arch (最新) |
+| 平台    | 最低版本                                |
+| ------- | --------------------------------------- |
+| macOS   | 11 (Big Sur)                            |
+| Windows | 10 (10.0.19041+) (React Native Windows) |
 
 ### 3.5 无障碍（Accessibility）
 
@@ -422,87 +421,60 @@ END;
 
 ### 4.1 整体架构
 
-```
-┌─────────────────────────────────────────────────┐
-│                   Wails 3 Shell                  │
-│  ┌─────────────┐         ┌────────────────────┐ │
-│  │  Go Backend  │◄──IPC──►│  React Frontend    │ │
-│  │             │         │                    │ │
-│  │ • SQLite DB  │         │ • @nicenote/editor │ │
-│  │ • File I/O   │         │ • @nicenote/ui     │ │
-│  │ • Backup     │         │ • @nicenote/tokens │ │
-│  │ • System API │         │ • @nicenote/shared │ │
-│  │ • Migration  │         │ • Zustand Store    │ │
-│  └──────┬──────┘         └────────────────────┘ │
-│         │                                        │
-│  ┌──────▼──────┐                                │
-│  │   SQLite    │  ~/.nicenote/data/nicenote.db  │
-│  └─────────────┘                                │
-└─────────────────────────────────────────────────┘
-```
-
-### 4.2 Go Backend 职责
-
-```
-apps/desktop/
-├── main.go                    # Wails 应用入口
-├── internal/
-│   ├── database/
-│   │   ├── database.go        # SQLite 连接管理、WAL 配置
-│   │   ├── migrations/        # SQL 迁移文件
-│   │   └── migrate.go         # 迁移执行器
-│   ├── service/
-│   │   ├── note_service.go    # 笔记 CRUD（暴露给前端的 Binding）
-│   │   ├── folder_service.go  # 文件夹管理
-│   │   ├── tag_service.go     # 标签管理
-│   │   ├── search_service.go  # FTS5 全文检索
-│   │   └── backup_service.go  # 备份与恢复
-│   ├── model/
-│   │   ├── note.go            # Note 结构体
-│   │   ├── folder.go          # Folder 结构体
-│   │   └── tag.go             # Tag 结构体
-│   └── platform/
-│       ├── paths.go           # 跨平台路径解析
-│       └── theme.go           # 系统主题检测
-├── frontend/                  # React 前端（Vite）
-│   ├── src/
-│   │   ├── App.tsx
-│   │   ├── pages/
-│   │   ├── components/
-│   │   ├── store/             # Zustand 状态管理
-│   │   ├── hooks/             # Go binding 调用 hooks
-│   │   └── lib/
-│   └── index.html
-├── build/                     # 平台特定资源（图标等）
-└── wails.json                 # Wails 配置
+```text
+┌────────────────────────────────────────────────────────┐
+│                   React Native App                     │
+│  ┌──────────────────┐           ┌───────────────────┐  │
+│  │   JS Thread      │◄──Bridge──►│    Native UI      │  │
+│  │                  │           │     WebView       │  │
+│  │ • Zustand Store  │           │ • @nicenote/editor│  │
+│  │ • Shared Logic   │           └─────────┬─────────┘  │
+│  │ • Shared Tokens  │                     │            │
+│  └────────┬─────────┘                     │            │
+│       JSI │ Synchronous             Native OS APIs     │
+│  ┌────────▼─────────┐           (File I/O, App Tray)   │
+│  │ op-sqlite Plugin │                                  │
+│  └────────┬─────────┘                                  │
+│           │                                            │
+│  ┌────────▼─────────┐                                  │
+│  │ SQLite DB        │  ~/.nicenote/data/nicenote.db    │
+│  └──────────────────┘                                  │
+└────────────────────────────────────────────────────────┘
 ```
 
-### 4.3 Go-JavaScript 通信
+### 4.2 Monorepo 目录职责
 
-Wails 3 的 Binding 系统将 Go struct 的公开方法暴露为前端可调用的 TypeScript 函数：
-
-```go
-// Go 端 — note_service.go
-type NoteService struct {
-    db *sql.DB
-}
-
-func (s *NoteService) List(cursor string, cursorId string, limit int) (*NoteListResult, error) { ... }
-func (s *NoteService) GetById(id string) (*Note, error) { ... }
-func (s *NoteService) Create(title string, content string) (*Note, error) { ... }
-func (s *NoteService) Update(id string, title *string, content *string) (*Note, error) { ... }
-func (s *NoteService) Delete(id string) error { ... }
-func (s *NoteService) Search(query string, limit int) ([]NoteListItem, error) { ... }
+```text
+nicenote/
+├── apps/
+│   └── desktop/                      # 统一的桌面端 React Native 工程
+│       ├── macos/                    # React Native Mac 原生工程
+│       ├── windows/                  # React Native Windows 原生工程
+│       ├── src/                      # JS/TS 业务代码（共享）
+│       │   ├── app/                  # 导航与入口
+│       │   ├── screens/              # 页面
+│       │   ├── components/           # 桌面特有组件
+│       │   └── native/               # 桥接方法声明
+│       └── metro.config.js
+├── packages/
+│   ├── shared/                       # 工具函数、类型、Zod Schema (多端复用)
+│   ├── tokens/                       # 设计变量 (多端复用)
+│   ├── editor/                       # Tiptap 编辑器 (多端复用)
+│   ├── database/                     # 基于 op-sqlite 的 Drizzle 抽象层 (桌面专属)
+│   ├── store/                        # Zustand 状态管理 (前端共享)
+│   ├── ui-native/                    # RN 专属公共组件类库 (桌面/移动端复用)
+│   └── editor-bridge/                # WebView 通信协议层及打包 (桌面专属)
 ```
 
-```typescript
-// 前端自动生成的 TypeScript binding
-import { NoteService } from '../bindings/services'
+### 4.3 App 与 Editor 通信机制
 
-// 直接调用，类型安全
-const result = await NoteService.List('', '', 50)
-const note = await NoteService.Create('My Note', '# Hello')
-```
+编辑器通过 `react-native-webview` 呈现。通信主要通过自定义 Bridge 方案：
+
+1. **渲染端**：`@nicenote/editor-bridge` 产出一份含 HTML 的静默前端代码，将其放到原生 Assets。
+2. **App -> WebView**：注入初始文本内容，下发夜间/日间模式主题事件。
+3. **WebView -> App**：通过 `window.ReactNativeWebView.postMessage` 将文本内容变更（Debounce）、当前选区字数、焦点等状态同步给 ReactNative 外层。
+
+外层 React Native 接收到文本后，直接通过 JSI `op-sqlite` 实时写入本地数据库。
 
 ### 4.4 前端状态管理
 
@@ -524,7 +496,7 @@ interface NoteStore {
   searchResults: NoteListItem[]
   isSearching: boolean
 
-  // Actions（通过 Go Binding 实现数据持久化）
+  // Actions（通过本地 JSI op-sqlite 实现数据持久化）
   loadNotes: () => Promise<void>
   loadMore: () => Promise<void>
   selectNote: (id: string | null) => void
@@ -544,8 +516,8 @@ interface NoteStore {
 | `@nicenote/ui`       | **完整复用** | Button、Toolbar、Popover、DropdownMenu、Tooltip、Input、Separator |
 | `@nicenote/ui` hooks | **完整复用** | useIsBreakpoint、useThrottledCallback、useComposedRef             |
 | `@nicenote/tokens`   | **完整复用** | 全部设计令牌（颜色/间距/排版/阴影/圆角/动画）                     |
-| `apps/web` store     | **参考改造** | Zustand 模式参考，数据源改为 Go Binding                           |
-| `apps/api` schema    | **不复用**   | Go 端使用 Go struct，前端通过 shared 包的 Zod schema 校验         |
+| `apps/web` store     | **参考改造** | Zustand 模式参考，数据源改为本地 op-sqlite                        |
+| `apps/api` schema    | **不复用**   | 桌面端完全离线，前端通过 shared 包的 Zod schema 校验              |
 
 ### 4.6 数据流
 
@@ -554,8 +526,8 @@ interface NoteStore {
          → debounce(1000ms)
          → sanitizeContent(markdown)
          → Zustand action: updateNote()
-         → Go Binding: NoteService.Update()
-         → SQLite: UPDATE notes SET content=?, summary=?, updated_at=?
+         → op-sqlite (Drizzle): db.update(notes).set({ content: ?, summary: ?, updated_at: ? })
+         → SQLite: 同步落库
          → 返回 updated Note
          → Zustand: 更新列表中对应项的 summary / updatedAt
          → UI: 列表项实时更新
@@ -628,7 +600,7 @@ interface NoteStore {
 
 **删除确认**
 
-- 使用 Wails 3 原生对话框 API
+- 使用 React Native 原生 Alert 对话框或自定义 UI 组件
 - 标题：「删除笔记」
 - 内容：「确定要将 "{note_title}" 移至回收站吗？」
 - 按钮：「取消」「移至回收站」
@@ -686,11 +658,10 @@ interface NoteStore {
 
 ### 7.1 构建产物
 
-| 平台    | 格式                                        | 说明                             |
-| ------- | ------------------------------------------- | -------------------------------- |
-| macOS   | `.dmg` + `.app`                             | Universal Binary (amd64 + arm64) |
-| Windows | `.exe` (NSIS installer) + `.zip` (portable) | x64，可选 arm64                  |
-| Linux   | `.AppImage` + `.deb` + `.rpm`               | x64                              |
+| 平台    | 格式                     | 说明                               |
+| ------- | ------------------------ | ---------------------------------- |
+| macOS   | `.dmg` + `.app`          | Universal Binary (通过 Xcode 构建) |
+| Windows | `.msix` (Appx) 或 `.exe` | x64/ARM64 (通过 MSBuild 构建)      |
 
 ### 7.2 自动更新（v1.1+）
 
@@ -726,24 +697,25 @@ interface NoteStore {
 
 ## 9. 风险与缓解
 
-| 风险                    | 影响           | 缓解措施                                             |
-| ----------------------- | -------------- | ---------------------------------------------------- |
-| Wails 3 仍为 Alpha      | API 可能变更   | 关注官方 changelog，封装 Wails API 调用层，降低耦合  |
-| CGo SQLite 交叉编译复杂 | CI/CD 构建困难 | 使用 modernc.org/sqlite（纯 Go SQLite）替代 CGo 方案 |
-| 前端包体积过大          | 安装包超标     | Tree-shaking + 按需加载 + Vite 构建优化              |
-| 多窗口数据一致性        | 编辑冲突       | 基于 Zustand 的单一 store + 事件广播                 |
-| 跨平台文件路径差异      | 数据库路径错误 | 使用 Go `os.UserConfigDir()` + 平台检测封装          |
+| 风险点                            | 概率/影响      | 应对方案                                                                                          |
+| --------------------------------- | -------------- | ------------------------------------------------------------------------------------------------- |
+| react-native-windows C++ 依赖     | 高 / 高        | 确保开发构建机器的 MSVC、Windows SDK 版本绝对对齐官方文档。建议使用固定版本镜像打包。             |
+| WebView 编辑器键盘/输入法遮挡问题 | 中 / 高        | 桌面端无软键盘遮挡，但中文输入法的“候选词框”可能偏移。需关闭 WebView 原生滚动，交由 Tiptap 处理。 |
+| SQLite FTS5 全文搜索默认缺失      | 中 / 中        | op-sqlite 若不含 FTS5，修改 CMakeList / Podspec 强制注入 `-DSQLITE_ENABLE_FTS5` 全局宏重新编译。  |
+| 前端包体积过大                    | 安装包超标     | Tree-shaking + 按需加载 + Vite 构建优化                                                           |
+| 多窗口数据一致性                  | 编辑冲突       | 基于 Zustand 的单一 store + 事件广播                                                              |
+| 跨平台文件路径差异                | 数据库路径错误 | 使用 Go `os.UserConfigDir()` + 平台检测封装                                                       |
 
 ---
 
 ## 10. 开放问题
 
-| #   | 问题                                                                      | 待定方案                                               |
-| --- | ------------------------------------------------------------------------- | ------------------------------------------------------ |
-| 1   | SQLite 方案选择：CGo（mattn/go-sqlite3）还是纯 Go（modernc.org/sqlite）？ | 纯 Go 方案跨平台编译更简单，但性能略低，需 benchmark   |
-| 2   | 是否支持通过 Wails 3 Server Mode 提供 Web 访问能力？                      | 与「不支持网络」原则可能冲突，但纯本地 Web UI 可以考虑 |
-| 3   | 图片存储策略：直接存 DB（BLOB）还是文件系统 + 引用路径？                  | 文件系统方案更灵活，但需处理引用完整性                 |
-| 4   | 是否需要加密数据库（SQLCipher）？                                         | 增加复杂度，但对隐私敏感用户有价值                     |
+| #   | 问题                                                                     | 待定方案                                                            |
+| --- | ------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| 1   | SQLite 同步与异步的选择：op-sqlite 支持 JSI 同步调用，是否默认全局开启？ | 建议除大型查询外，常规 CRUD 均使用同步调用以降低中间状态维护成本    |
+| 2   | 原生托盘模块（System Tray）缺少官方支持，如何实现？                      | 考虑为 Mac/Windows 分别手写精简版 Native Module，仅实现基础菜单响应 |
+| 3   | 图片存储策略：直接存 DB（BLOB）还是文件系统 + 引用路径？                 | 文件系统方案更灵活，但需处理引用完整性                              |
+| 4   | 是否需要加密数据库（SQLCipher）？                                        | 增加复杂度，但对隐私敏感用户有价值                                  |
 
 ---
 

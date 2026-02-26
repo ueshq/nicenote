@@ -1,4 +1,4 @@
-# Nicenote
+# NiceNote
 
 A full-stack note-taking app with rich text editing, deployed on Cloudflare.
 
@@ -57,26 +57,33 @@ pnpm --filter web generate:css   # Regenerate CSS from design tokens
 
 ### Database Schema
 
-Single `notes` table in `apps/api/src/db/schema.ts`:
+Tables in `apps/api/src/db/schema.ts`:
 
-- `id` (text, PK, nanoid), `title` (text), `content` (text, Markdown), `createdAt`/`updatedAt` (ISO 8601 strings)
+- `notes`: `id` (text, PK, nanoid), `title` (text), `content` (text, Markdown), `summary` (text), `folderId` (text, FK), `createdAt`/`updatedAt` (ISO 8601 strings)
+- `folders`: `id` (text, PK), `name` (text), `parentId` (text, FK), `position` (integer), `createdAt`/`updatedAt`
+- `tags`: `id` (text, PK), `name` (text), `color` (text), `createdAt`
+- `note_tags`: `noteId` (FK), `tagId` (FK)
 
-### API Routes (apps/api/src/index.ts)
+### API Routes (apps/api/src/\*-routes.ts)
 
 ```
-GET    /           # Health check
-GET    /notes      # List all (sorted by updatedAt desc)
-GET    /notes/:id  # Get one
-POST   /notes      # Create
-PATCH  /notes/:id  # Update
-DELETE /notes/:id  # Delete
+GET    /                 # Health check
+GET    /health           # Health check
+GET    /notes            # List all (with cursor-based pagination)
+GET    /notes/search     # Search notes
+GET    /notes/:id        # Get one
+POST   /notes            # Create
+PATCH  /notes/:id        # Update
+DELETE /notes/:id        # Delete
 ```
+
+Folders (`/folders`) and Tags (`/tags`) also support full CRUD operations.
 
 CORS allows: localhost:5173, nicenote.app, nicenote.pages.dev
 
 ### State Management
 
-Zustand store at `apps/web/src/store/useNoteStore.ts` manages notes CRUD with optimistic updates and 1-second debounced auto-save.
+Zustand store at `apps/web/src/store/useNoteStore.ts` manages notes CRUD with cursor-based pagination, optimistic updates, auto-generated summaries, and 1-second debounced auto-save.
 
 ### Theme System
 
