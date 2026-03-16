@@ -3,14 +3,14 @@ import { defineConfig } from 'vite'
 
 /**
  * Builds the Tiptap editor into a single self-contained HTML file.
- * Output: src/assets/editor.html (imported as a string by EditorWebView.tsx)
+ * Output: dist/generated/editor.html (imported as a string by EditorWebView.tsx)
  *
  * Run with: pnpm --filter @nicenote/editor-bridge build:template
  */
 export default defineConfig({
   root: resolve(__dirname, 'template'),
   build: {
-    outDir: resolve(__dirname, 'src/assets'),
+    outDir: resolve(__dirname, 'dist/generated'),
     emptyOutDir: true,
     // Inline all assets so the result is a single self-contained HTML
     assetsInlineLimit: Infinity,

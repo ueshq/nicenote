@@ -1,7 +1,7 @@
 import type { StateCreator } from 'zustand'
 
+import { setCurrentFolder } from '../../adapters/repository-provider'
 import { AppService } from '../../bindings/tauri'
-import { setCurrentFolder } from '../../lib/repository-provider'
 import type { DesktopStore } from '../useDesktopStore'
 
 export interface FolderSlice {

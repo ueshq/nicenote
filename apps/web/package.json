@@ -1,5 +1,5 @@
 {
-  "name": "web",
+  "name": "@nicenote/web",
   "version": "0.0.0",
   "dependencies": {
     "@nicenote/app-shell": "workspace:*",
@@ -30,9 +30,9 @@
   },
   "private": true,
   "scripts": {
-    "build": "pnpm --filter @nicenote/tokens build && tsx scripts/generate-css.ts && tsc --noEmit && vite build",
-    "dev": "pnpm --filter @nicenote/tokens build && tsx scripts/generate-css.ts && vite",
-    "generate:css": "pnpm --filter @nicenote/tokens build && tsx scripts/generate-css.ts",
+    "build": "pnpm --filter @nicenote/tokens build && tsc --noEmit && vite build",
+    "dev": "pnpm --filter @nicenote/tokens build && vite",
+    "generate:css": "pnpm --filter @nicenote/tokens generate:css",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run"

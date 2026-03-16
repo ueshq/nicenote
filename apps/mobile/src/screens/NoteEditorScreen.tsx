@@ -3,7 +3,7 @@ import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
 
 // TODO: Integrate @nicenote/editor-bridge for rich text editing via WebView
 // TODO: Load note content from @nicenote/database
-// TODO: Auto-save with debounce via @nicenote/store
+// TODO: Auto-save with debounce via ../store
 // TODO: Add toolbar for formatting actions
 
 export function NoteEditorScreen(): React.JSX.Element {

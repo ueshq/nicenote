@@ -2,7 +2,7 @@ import type { StateCreator } from 'zustand'
 
 import type { NoteSearchResult } from '@nicenote/shared'
 
-import { getCurrentRepo } from '../../lib/repository-provider'
+import { getCurrentRepo } from '../../adapters/repository-provider'
 import type { DesktopStore } from '../useDesktopStore'
 
 export interface SearchSlice {

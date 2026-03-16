@@ -8,10 +8,12 @@
 // 工具函数
 // ============================================================
 export { DEFAULT_NOTE_TITLE, LANG_STORAGE_KEY, THEME_STORAGE_KEY } from './constants'
-export { debounce, throttle } from './debounce'
 export { toKebabCase } from './parsers'
-export { sanitizeContent } from './sanitize'
-export { generateSummary } from './summary'
+export { debounce } from './utils/debounce'
+export { formatShortcutKey, isMac, MAC_SYMBOLS, parseShortcutKeys } from './utils/platform'
+export { sanitizeContent } from './utils/sanitize'
+export { generateSummary } from './utils/summary'
+export { throttle } from './utils/throttle'
 export type { LinkValidationErrorKey } from './validators'
 export { getLinkValidationError } from './validators'
 
@@ -28,7 +30,7 @@ export type {
   NoteSearchResult,
   NoteSelect,
   NoteUpdateInput,
-} from './schemas'
+} from './schemas/note'
 export {
   noteCreateSchema,
   noteIdParamSchema,
@@ -38,27 +40,27 @@ export {
   noteSearchResultSchema,
   noteSelectSchema,
   noteUpdateSchema,
-} from './schemas'
+} from './schemas/note'
 
 // ============================================================
 // Folder Schema & 类型
 // ============================================================
-export type { FolderCreateInput, FolderSelect, FolderUpdateInput } from './folder-schemas'
+export type { FolderCreateInput, FolderSelect, FolderUpdateInput } from './schemas/folder'
 export {
   folderCreateSchema,
   folderIdParamSchema,
   folderSelectSchema,
   folderUpdateSchema,
-} from './folder-schemas'
+} from './schemas/folder'
 
 // ============================================================
 // Tag Schema & 类型
 // ============================================================
-export type { TagCreateInput, TagSelect, TagUpdateInput } from './tag-schemas'
+export type { TagCreateInput, TagSelect, TagUpdateInput } from './schemas/tag'
 export {
   noteTagParamSchema,
   tagCreateSchema,
   tagIdParamSchema,
   tagSelectSchema,
   tagUpdateSchema,
-} from './tag-schemas'
+} from './schemas/tag'

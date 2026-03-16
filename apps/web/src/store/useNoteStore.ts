@@ -3,7 +3,7 @@ import { create } from 'zustand'
 import type { NoteListItem, NoteSearchResult, NoteSelect, TagSelect } from '@nicenote/shared'
 import { generateSummary } from '@nicenote/shared'
 
-import { LocalStorageNoteRepository } from '../lib/local-storage-note-repository'
+import { LocalStorageNoteRepository } from '../adapters/local-storage-note-repository'
 
 // ============================================================
 // Repository 实例（通过 domain 层接口访问数据）

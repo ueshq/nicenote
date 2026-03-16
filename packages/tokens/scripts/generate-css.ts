@@ -317,12 +317,9 @@ ${themeCSS}
 ${darkThemeCSS}
 `
 
-// 从 CLI 参数获取输出路径
-const outputPath = process.argv[2]
-if (!outputPath) {
-  console.error('❌ 请指定输出路径，例如: tsx generate-css.ts ./src/generated-tokens.css')
-  process.exit(1)
-}
+// 输出路径：优先使用 CLI 参数，默认输出到 dist/generated-tokens.css
+const defaultOutput = resolve(new URL('..', import.meta.url).pathname, 'dist/generated-tokens.css')
+const outputPath = process.argv[2] ?? defaultOutput
 
 writeFileSync(resolve(outputPath), generatedTokensContent, 'utf-8')
 console.log(`✅ Theme CSS generated successfully → ${outputPath}`)

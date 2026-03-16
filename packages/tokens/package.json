@@ -13,8 +13,9 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./styles/shared-utilities.css": "./src/styles/shared-utilities.css",
-    "./styles/shared-base.css": "./src/styles/shared-base.css"
+    "./generated-tokens.css": "./dist/generated-tokens.css",
+    "./styles/token-utilities.css": "./src/styles/token-utilities.css",
+    "./styles/token-base.css": "./src/styles/token-base.css"
   },
   "files": [
     "dist",
@@ -23,7 +24,8 @@
   "main": "./dist/index.js",
   "private": true,
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && tsx scripts/generate-css.ts",
+    "generate:css": "tsx scripts/generate-css.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },

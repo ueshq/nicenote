@@ -4,12 +4,12 @@
 /* NiceNote 编辑器样式 */
 @import '@nicenote/editor/styles/editor.css';
 
-/* 由 scripts/generate-css.ts 生成的设计 token CSS 变量 */
-@import './generated-tokens.css';
+/* 由 @nicenote/tokens build 生成的设计 token CSS 变量 */
+@import '@nicenote/tokens/generated-tokens.css';
 
-/* 共享自定义工具类和基础样式 */
-@import '@nicenote/tokens/styles/shared-utilities.css';
-@import '@nicenote/tokens/styles/shared-base.css';
+/* token 工具类和基础样式 */
+@import '@nicenote/tokens/styles/token-utilities.css';
+@import '@nicenote/tokens/styles/token-base.css';
 
 /* 折叠按钮悬停阴影（与 web 端对齐） */
 @utility shadow-toggle {

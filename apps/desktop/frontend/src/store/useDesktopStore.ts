@@ -10,10 +10,6 @@ import type { SearchSlice } from './slices/searchSlice'
 import { createSearchSlice } from './slices/searchSlice'
 import type { SettingsSlice } from './slices/settingsSlice'
 import { createSettingsSlice } from './slices/settingsSlice'
-import type { SidebarSlice } from './slices/sidebarSlice'
-import { createSidebarSlice } from './slices/sidebarSlice'
-import type { ToastSlice } from './slices/toastSlice'
-import { createToastSlice } from './slices/toastSlice'
 import type { WatcherSlice } from './slices/watcherSlice'
 import { createWatcherSlice } from './slices/watcherSlice'
 
@@ -21,13 +17,7 @@ import { createWatcherSlice } from './slices/watcherSlice'
 // 合并类型
 // ============================================================
 
-export type DesktopStore = FolderSlice &
-  NoteSlice &
-  SearchSlice &
-  SettingsSlice &
-  SidebarSlice &
-  ToastSlice &
-  WatcherSlice
+export type DesktopStore = FolderSlice & NoteSlice & SearchSlice & SettingsSlice & WatcherSlice
 
 // ============================================================
 // Store 创建
@@ -38,8 +28,6 @@ export const useDesktopStore = create<DesktopStore>((...a) => ({
   ...createNoteSlice(...a),
   ...createSearchSlice(...a),
   ...createSettingsSlice(...a),
-  ...createSidebarSlice(...a),
-  ...createToastSlice(...a),
   ...createWatcherSlice(...a),
 }))
 

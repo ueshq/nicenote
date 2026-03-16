@@ -2,7 +2,7 @@ import React from 'react'
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
 
 // TODO: Replace with actual note list fetched from @nicenote/database
-// TODO: Integrate @nicenote/store for state management
+// TODO: Integrate ../store for state management
 // TODO: Add FAB for creating new notes
 // TODO: Add folder sidebar / drawer navigation
 

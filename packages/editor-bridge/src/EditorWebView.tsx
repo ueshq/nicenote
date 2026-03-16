@@ -8,10 +8,10 @@ import { useEditorBridge } from './useEditorBridge'
 // The editor HTML bundle is built by running:
 //   pnpm --filter @nicenote/editor-bridge build:template
 //
-// The output lands at src/assets/editor.html and is inlined here as a string
+// The output lands at dist/generated/editor.html and is inlined here as a string
 // so the WebView has no network dependency (works offline, no file:// path issues).
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const EDITOR_HTML: string = require('./assets/editor.html')
+const EDITOR_HTML: string = require('../dist/generated/editor.html')
 
 export const EditorWebView = React.forwardRef<
   ReturnType<typeof useEditorBridge>,

@@ -7,10 +7,10 @@
     },
     "generate:css": {
       "dependsOn": ["^build"],
-      "outputs": ["src/generated-tokens.css"]
+      "outputs": ["dist/generated-tokens.css"]
     },
-    "web#build": {
-      "dependsOn": ["^build", "generate:css"],
+    "@nicenote/web#build": {
+      "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
     "lint": {
@@ -24,20 +24,20 @@
       "cache": false,
       "persistent": true
     },
-    "nicenote-mobile#start": {
+    "@nicenote/mobile#start": {
       "cache": false,
       "persistent": true
     },
-    "nicenote-mobile#ios": {
+    "@nicenote/mobile#ios": {
       "dependsOn": ["^build"],
       "cache": false
     },
-    "nicenote-mobile#android": {
+    "@nicenote/mobile#android": {
       "dependsOn": ["^build"],
       "cache": false
     },
     "@nicenote/editor-bridge#build:template": {
-      "outputs": ["src/assets/editor.html"],
+      "outputs": ["dist/generated/editor.html"],
       "dependsOn": ["^build"]
     },
     "@nicenote/desktop#build": {

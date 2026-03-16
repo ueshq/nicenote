@@ -141,9 +141,6 @@ importers:
       tailwindcss:
         specifier: ^4.2.0
         version: 4.2.0
-      tsx:
-        specifier: ^4.19.3
-        version: 4.21.0
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
@@ -162,9 +159,6 @@ importers:
       '@nicenote/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@nicenote/store':
-        specifier: workspace:*
-        version: link:../../packages/store
       '@nicenote/ui-native':
         specifier: workspace:*
         version: link:../../packages/ui-native
@@ -174,6 +168,9 @@ importers:
       '@react-navigation/native-stack':
         specifier: ^7.0.0
         version: 7.14.0(@react-navigation/native@7.1.29(react-native@0.79.2(@babel/core@7.29.0)(@types/react@19.2.10)(react@19.0.0))(react@19.0.0))(react-native-safe-area-context@5.7.0(react-native@0.79.2(@babel/core@7.29.0)(@types/react@19.2.10)(react@19.0.0))(react@19.0.0))(react-native-screens@4.24.0(react-native@0.79.2(@babel/core@7.29.0)(@types/react@19.2.10)(react@19.0.0))(react@19.0.0))(react-native@0.79.2(@babel/core@7.29.0)(@types/react@19.2.10)(react@19.0.0))(react@19.0.0)
+      immer:
+        specifier: ^10.0.0
+        version: 10.2.0
       nativewind:
         specifier: ^4.2.2
         version: 4.2.2(react-native-safe-area-context@5.7.0(react-native@0.79.2(@babel/core@7.29.0)(@types/react@19.2.10)(react@19.0.0))(react@19.0.0))(react-native@0.79.2(@babel/core@7.29.0)(@types/react@19.2.10)(react@19.0.0))(react@19.0.0)(tailwindcss@4.2.0)
@@ -189,6 +186,9 @@ importers:
       react-native-screens:
         specifier: ^4.0.0
         version: 4.24.0(react-native@0.79.2(@babel/core@7.29.0)(@types/react@19.2.10)(react@19.0.0))(react@19.0.0)
+      zustand:
+        specifier: ^5.0.0
+        version: 5.0.11(@types/react@19.2.10)(immer@10.2.0)(react@19.0.0)(use-sync-external-store@1.6.0(react@19.0.0))
     devDependencies:
       '@react-native/babel-preset':
         specifier: 0.79.0
@@ -281,6 +281,9 @@ importers:
 
   packages/app-shell:
     dependencies:
+      '@nicenote/domain':
+        specifier: workspace:*
+        version: link:../domain
       '@nicenote/editor':
         specifier: workspace:*
         version: link:../editor
@@ -318,6 +321,9 @@ importers:
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
+      zustand:
+        specifier: ^5.0.10
+        version: 5.0.11(@types/react@19.2.10)(immer@10.2.0)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
 
   packages/database:
     dependencies:
@@ -347,6 +353,9 @@ importers:
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
+      vitest:
+        specifier: ^3.2.3
+        version: 3.2.4(@types/node@20.19.33)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/editor:
     dependencies:
@@ -430,25 +439,6 @@ importers:
       zod:
         specifier: ^4.3.6
         version: 4.3.6
-    devDependencies:
-      typescript:
-        specifier: ~5.9.3
-        version: 5.9.3
-
-  packages/store:
-    dependencies:
-      '@nicenote/database':
-        specifier: workspace:*
-        version: link:../database
-      '@nicenote/shared':
-        specifier: workspace:*
-        version: link:../shared
-      immer:
-        specifier: ^10.0.0
-        version: 10.2.0
-      zustand:
-        specifier: ^5.0.0
-        version: 5.0.11(@types/react@19.2.10)(immer@10.2.0)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
     devDependencies:
       typescript:
         specifier: ~5.9.3
@@ -11395,6 +11385,13 @@ snapshots:
       zod: 4.3.6
 
   zod@4.3.6: {}
+
+  zustand@5.0.11(@types/react@19.2.10)(immer@10.2.0)(react@19.0.0)(use-sync-external-store@1.6.0(react@19.0.0)):
+    optionalDependencies:
+      '@types/react': 19.2.10
+      immer: 10.2.0
+      react: 19.0.0
+      use-sync-external-store: 1.6.0(react@19.0.0)
 
   zustand@5.0.11(@types/react@19.2.10)(immer@10.2.0)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4)):
     optionalDependencies:

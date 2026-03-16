@@ -13,9 +13,11 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "vitest run"
   },
   "dependencies": {
+    "@nicenote/domain": "workspace:*",
     "@nicenote/editor": "workspace:*",
     "@nicenote/shared": "workspace:*",
     "@nicenote/ui": "workspace:*",
@@ -29,12 +31,14 @@
     "lucide-react": "^0.563.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "zustand": "^5.0.10"
   },
   "peerDependencies": {
     "date-fns": "^4.1.0",
     "lucide-react": "^0.563.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "zustand": "^5.0.0"
   }
 }

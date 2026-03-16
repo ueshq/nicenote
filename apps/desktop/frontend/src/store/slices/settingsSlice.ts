@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand'
 
-import { i18n } from '@nicenote/app-shell'
+import { applyThemeToDOM, i18n } from '@nicenote/app-shell'
 
 import type { Settings } from '../../bindings/tauri'
 import { AppService } from '../../bindings/tauri'
@@ -77,7 +77,7 @@ export const createSettingsSlice: StateCreator<DesktopStore, [], [], SettingsSli
       const settings = await AppService.GetSettings()
       if (!settings) return
       set({ settings })
-      applyTheme(settings.theme)
+      applyThemeToDOM(settings.theme as 'light' | 'dark' | 'system')
       localStorage.setItem(THEME_STORAGE_KEY, settings.theme)
       localStorage.setItem(LANG_STORAGE_KEY, settings.language)
       // 同步 i18n 语言
@@ -92,7 +92,7 @@ export const createSettingsSlice: StateCreator<DesktopStore, [], [], SettingsSli
     const updated: Settings = { ...current, ...patch }
     set({ settings: updated })
     if (patch.theme) {
-      applyTheme(patch.theme)
+      applyThemeToDOM(patch.theme as 'light' | 'dark' | 'system')
       localStorage.setItem(THEME_STORAGE_KEY, patch.theme)
     }
     if (patch.language) {
@@ -126,16 +126,3 @@ export const createSettingsSlice: StateCreator<DesktopStore, [], [], SettingsSli
     }
   },
 })
-
-// 工具函数：应用主题到 DOM
-function applyTheme(theme: Settings['theme']) {
-  const root = document.documentElement
-  if (theme === 'system') {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    root.classList.toggle('dark', prefersDark)
-    root.setAttribute('data-theme', prefersDark ? 'dark' : 'light')
-  } else {
-    root.classList.toggle('dark', theme === 'dark')
-    root.setAttribute('data-theme', theme)
-  }
-}

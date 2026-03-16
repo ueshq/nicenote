@@ -14,10 +14,9 @@ import type { NoteSelect } from '@nicenote/shared'
 import { generateSummary } from '@nicenote/shared'
 import { useIsBreakpoint } from '@nicenote/ui'
 
-import { useLanguageStore } from '../store/useLanguageStore'
 import { useNoteStore } from '../store/useNoteStore'
+import { useSettingsStore } from '../store/useSettingsStore'
 import { useSidebarStore } from '../store/useSidebarStore'
-import { useThemeStore } from '../store/useThemeStore'
 import { useToastStore } from '../store/useToastStore'
 
 // ============================================================
@@ -92,45 +91,10 @@ export function WebAppShellProvider({ children }: { children: React.ReactNode })
     }))
   )
 
-  // Sidebar store
-  const sidebar = useSidebarStore(
-    useShallow((s) => ({
-      isOpen: s.isOpen,
-      width: s.width,
-      isResizing: s.isResizing,
-      open: s.open,
-      close: s.close,
-      toggle: s.toggle,
-      setWidth: s.setWidth,
-      startResize: s.startResize,
-      stopResize: s.stopResize,
-    }))
-  )
-
-  // Theme store
-  const { theme, setTheme } = useThemeStore(
-    useShallow((s) => ({
-      theme: s.theme,
-      setTheme: s.setTheme,
-    }))
-  )
-
-  // Language store
-  const { language, setLanguage } = useLanguageStore(
-    useShallow((s) => ({
-      language: s.language,
-      setLanguage: s.setLanguage,
-    }))
-  )
-
-  // Toast store
-  const { toasts, addToast, removeToast } = useToastStore(
-    useShallow((s) => ({
-      toasts: s.toasts,
-      addToast: s.addToast,
-      removeToast: s.removeToast,
-    }))
-  )
+  // 独立 stores
+  const sidebar = useSidebarStore()
+  const { theme, setTheme, language, setLanguage } = useSettingsStore()
+  const { toasts, addToast, removeToast } = useToastStore()
 
   // 标签 ID→name 映射
   const tagMap = useMemo(() => {

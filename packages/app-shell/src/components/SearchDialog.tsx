@@ -3,10 +3,12 @@ import { useTranslation } from 'react-i18next'
 
 import { FileText } from 'lucide-react'
 
-import { HighlightSnippet, SearchDialog as SearchDialogBase } from '@nicenote/ui'
+import { SearchDialogPrimitive } from '@nicenote/ui'
 
 import { useAppShell } from '../context'
 import type { AppSearchResult } from '../types'
+
+import { HighlightSnippet } from './HighlightSnippet'
 
 interface SearchDialogProps {
   open: boolean
@@ -60,7 +62,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
   )
 
   return (
-    <SearchDialogBase<AppSearchResult>
+    <SearchDialogPrimitive<AppSearchResult>
       open={open}
       onClose={onClose}
       onSearch={handleSearch}

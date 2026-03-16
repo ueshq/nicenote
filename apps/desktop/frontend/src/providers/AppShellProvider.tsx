@@ -14,10 +14,12 @@ import type {
 } from '@nicenote/app-shell'
 import { AppShellContext, ICON_SM_CLASS } from '@nicenote/app-shell'
 
+import { getCurrentRepo } from '../adapters/repository-provider'
 import type { NoteContent, NoteFile } from '../bindings/tauri'
-import { getCurrentRepo } from '../lib/repository-provider'
 import type { CurrentView } from '../store/useDesktopStore'
 import { useDesktopStore } from '../store/useDesktopStore'
+import { useSidebarStore } from '../store/useSidebarStore'
+import { useToastStore } from '../store/useToastStore'
 
 // ============================================================
 // 数据模型转换
@@ -86,10 +88,6 @@ export function DesktopAppShellProvider({ children }: { children: React.ReactNod
       favorites: s.favorites,
       tagColors: s.tagColors,
       settings: s.settings,
-      toasts: s.toasts,
-      sidebarOpen: s.sidebarOpen,
-      sidebarWidth: s.sidebarWidth,
-      isResizing: s.isResizing,
       // actions
       openNote: s.openNote,
       saveNote: s.saveNote,
@@ -100,16 +98,12 @@ export function DesktopAppShellProvider({ children }: { children: React.ReactNod
       setCurrentView: s.setCurrentView,
       saveSettings: s.saveSettings,
       toggleFavorite: s.toggleFavorite,
-      addToast: s.addToast,
-      removeToast: s.removeToast,
-      openSidebar: s.openSidebar,
-      closeSidebar: s.closeSidebar,
-      toggleSidebar: s.toggleSidebar,
-      setSidebarWidth: s.setSidebarWidth,
-      startResize: s.startResize,
-      stopResize: s.stopResize,
     }))
   )
+
+  // 独立 stores
+  const sidebar = useSidebarStore()
+  const { toasts, addToast, removeToast } = useToastStore()
 
   // 转换笔记列表
   const appNotes = useMemo(() => store.notes.map(noteFileToAppItem), [store.notes])
@@ -146,7 +140,6 @@ export function DesktopAppShellProvider({ children }: { children: React.ReactNod
       if (id) {
         store.openNote(id)
       }
-      // id 为 null 时无需特殊处理（desktop 的 activeNote 通过 openNote 设置）
     },
     [store.openNote]
   )
@@ -200,32 +193,6 @@ export function DesktopAppShellProvider({ children }: { children: React.ReactNod
       return []
     }
   }, [])
-
-  // 侧边栏
-  const sidebar = useMemo(
-    () => ({
-      isOpen: store.sidebarOpen,
-      width: store.sidebarWidth,
-      isResizing: store.isResizing,
-      open: store.openSidebar,
-      close: store.closeSidebar,
-      toggle: store.toggleSidebar,
-      setWidth: store.setSidebarWidth,
-      startResize: store.startResize,
-      stopResize: store.stopResize,
-    }),
-    [
-      store.sidebarOpen,
-      store.sidebarWidth,
-      store.isResizing,
-      store.openSidebar,
-      store.closeSidebar,
-      store.toggleSidebar,
-      store.setSidebarWidth,
-      store.startResize,
-      store.stopResize,
-    ]
-  )
 
   // 主题和语言
   const setTheme = useCallback(
@@ -291,7 +258,6 @@ export function DesktopAppShellProvider({ children }: { children: React.ReactNod
       renderActions: (noteId: string) => <FavoriteButton path={noteId} />,
       onContextMenu: (noteId: string, e: React.MouseEvent) => {
         e.preventDefault()
-        // 右键菜单可以后续扩展
       },
     }),
     []
@@ -317,9 +283,9 @@ export function DesktopAppShellProvider({ children }: { children: React.ReactNod
       setTheme,
       language: store.settings.language,
       setLanguage,
-      toasts: store.toasts,
-      addToast: store.addToast,
-      removeToast: store.removeToast,
+      toasts,
+      addToast,
+      removeToast,
       searchNotes,
       isMobile: false,
       extraNavItems,
@@ -344,9 +310,9 @@ export function DesktopAppShellProvider({ children }: { children: React.ReactNod
       setTheme,
       store.settings.language,
       setLanguage,
-      store.toasts,
-      store.addToast,
-      store.removeToast,
+      toasts,
+      addToast,
+      removeToast,
       searchNotes,
       extraNavItems,
       noteListItemSlots,

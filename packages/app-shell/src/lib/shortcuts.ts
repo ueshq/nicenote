@@ -1,3 +1,5 @@
+import { isMac } from '@nicenote/shared'
+
 export interface ShortcutDefinition {
   key: string
   meta?: boolean
@@ -6,9 +8,7 @@ export interface ShortcutDefinition {
   category: 'general' | 'editor'
 }
 
-const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent)
-
-export const MOD_KEY_LABEL = isMac ? '\u2318' : 'Ctrl'
+export const MOD_KEY_LABEL = isMac() ? '\u2318' : 'Ctrl'
 
 export const SHORTCUTS: ShortcutDefinition[] = [
   { key: 'k', meta: true, label: 'shortcuts.search', category: 'general' },
@@ -27,9 +27,10 @@ export function matchesShortcut(e: KeyboardEvent, shortcut: ShortcutDefinition):
 }
 
 export function formatShortcut(shortcut: ShortcutDefinition): string {
+  const mac = isMac()
   const parts: string[] = []
   if (shortcut.meta) parts.push(MOD_KEY_LABEL)
   if (shortcut.shift) parts.push('Shift')
   parts.push(shortcut.key === '\\' ? '\\' : shortcut.key.toUpperCase())
-  return parts.join(isMac ? '' : '+')
+  return parts.join(mac ? '' : '+')
 }

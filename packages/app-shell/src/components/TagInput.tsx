@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next'
 
 import { Plus } from 'lucide-react'
 
-import { TagPill } from '@nicenote/ui'
-
 import { useAppShell } from '../context'
 import { ICON_SM_CLASS } from '../lib/class-names'
+
+import { TagPill } from './TagPill'
 
 interface TagInputProps {
   noteId: string

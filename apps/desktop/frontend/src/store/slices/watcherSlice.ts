@@ -8,10 +8,7 @@ export interface WatcherSlice {
   handleFileDeleted: (path: string) => void
 }
 
-export const createWatcherSlice: StateCreator<DesktopStore, [], [], WatcherSlice> = (
-  set,
-  get
-) => ({
+export const createWatcherSlice: StateCreator<DesktopStore, [], [], WatcherSlice> = (set, get) => ({
   handleFileCreated: (path: string) => {
     const { currentFolder } = get()
     if (!currentFolder) return

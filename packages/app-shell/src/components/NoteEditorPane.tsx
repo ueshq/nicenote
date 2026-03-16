@@ -6,13 +6,13 @@ import { FileText, Plus } from 'lucide-react'
 
 import type { EditorLabels } from '@nicenote/editor'
 import { NicenoteEditor } from '@nicenote/editor'
-import { SaveStateIndicator } from '@nicenote/ui'
 
 import { useAppShell } from '../context'
 import { useMinuteTicker } from '../hooks/useMinuteTicker'
 import { ICON_SM_CLASS } from '../lib/class-names'
 import { getDateLocale } from '../lib/date-locale'
 
+import { SaveStateIndicator } from './SaveStateIndicator'
 import { TagInput } from './TagInput'
 
 interface NoteEditorPaneProps {
